@@ -1601,28 +1601,24 @@ function setPendingOverride(type, caseId, fields) {
 function applyPendingOverrides(type, rows) {
   const overrides = pendingOverrides[type] || {};
   return rows.map(row => {
-    const ov = overrides[row.caseId];
+    const ov = overrides[row.id];
     if (!ov) return row;
-
-    // If sheet has a real MCB Status value — sheet is source of truth, clear override
     if (row.manageableStatus || row.status !== 'Pending') {
-      delete pendingOverrides[type][row.caseId];
+      delete pendingOverrides[type][row.id];
       savePendingOverrides();
       return row;
     }
-
-    // Sheet still empty — keep local override
     return { ...row, ...ov };
   });
 }
 
 function mergeSheetWithLocal(sheetRows, localRows) {
-  // Preserve local timeline (not stored in sheet) keyed by caseId
+  // Key by id (sheetRow-based) so duplicate caseIds stay as separate rows
   const localMap = {};
-  (localRows || []).forEach(r => { if (r.caseId) localMap[r.caseId] = r; });
+  (localRows || []).forEach(r => { if (r.id) localMap[r.id] = r; });
   return sheetRows.map(sheetRow => ({
     ...sheetRow,
-    timeline: (localMap[sheetRow.caseId] || {}).timeline || []
+    timeline: (localMap[sheetRow.id] || {}).timeline || []
   }));
 }
 
@@ -1795,7 +1791,10 @@ function normalizeRow(r, sheetRow) {
 
   const caseId = String(r['Case ID'] || '').trim();
 
-  const uniqueId = caseId || [r['Requestor?'], r['Submitted At'], r['Which BPO?']].join('|') || Math.random().toString(36).substr(2,9);
+  // sheetRow makes id unique even when two rows share the same caseId
+  const uniqueId = sheetRow
+    ? (caseId ? caseId + '_r' + sheetRow : 'row_' + sheetRow)
+    : caseId || [r['Requestor?'], r['Submitted At'], r['Which BPO?']].join('|') || Math.random().toString(36).substr(2,9);
 
   // Apps Script sends duplicate headers as: 'Manageable Status' (L1) and 'Manageable Status_2' (L2)
   // MCB Status = "Resolved" or "Not Resolved"
@@ -1867,6 +1866,9 @@ function postToSheet(sheetName, action, payload) {
       // Limit recap to 2000 chars to avoid URL length issues
       const val = k === 'recap' ? String(v).substring(0, 2000) : String(v);
       params.set(k, val);
+    } else if (k === 'sheetRow' && v) {
+      // Always send sheetRow if it has a value
+      params.set(k, String(v));
     }
   });
   params.set('ts', Date.now());
@@ -2820,7 +2822,7 @@ function applyManageableStatus(id, type) {
   if (l3CallbackDate) { row.l3CallbackDate = l3CallbackDate; row.l3CallbackTime = l3CallbackTime; }
 
   // ── Register override so sheet refreshes don't revert this ──
-  setPendingOverride(type, row.caseId, { status: newStatus, layer: newLayer });
+  setPendingOverride(type, row.id, { status: newStatus, layer: newLayer });
   if (summary) row.summary = (row.summary ? row.summary + '\n\n[Post-MCB] ' : '[Post-MCB] ') + summary;
   if (note)    row.notes   = note;
 
@@ -2857,7 +2859,7 @@ function applyManageableStatus(id, type) {
     showToast('⚠ Cannot update sheet — Case ID is missing', 'error');
   } else {
     postToSheet(type === 'mcb' ? state.mcbSheetName : state.prSheetName, 'update', {
-      caseId: sheetCaseId, status: newStatus, layer: newLayer,
+      caseId: sheetCaseId, sheetRow: row.sheetRow || '', status: newStatus, layer: newLayer,
       note, actorName, updatedAt: now,
       manageableStatus: outcomeLabel,
       recap: recapLines,
@@ -3000,7 +3002,7 @@ function updateCase(id, type, newStatus, newLayer) {
   row.timeline.push({ action: actionLabel, by: state.agentName || state.role, bpo: state.bpo, at: now, note });
 
   postToSheet(type === 'mcb' ? state.mcbSheetName : state.prSheetName, 'update', {
-    caseId: row.caseId, status: newStatus, layer: newLayer, note, updatedAt: now
+    caseId: row.caseId, sheetRow: row.sheetRow || '', status: newStatus, layer: newLayer, note, updatedAt: now
   });
 
   saveLocalData();
@@ -3288,20 +3290,17 @@ function getStatsData() {
     });
   });
 
-  // Dedup within each type separately — MCB and PR can share the same caseId (same order).
-  // Rows with no caseId are always kept (they can't be duplicates of anything).
+  // Dedup by row.id (sheetRow-based) — NOT caseId — duplicate caseIds = separate cases
   let mcbIdx = 0, prIdx = 0;
   const seenMCB = new Set();
   const seenPR  = new Set();
   const dedupMCB = arr => arr.filter(r => {
-    const k = (r.caseId || r.id || '').trim();
-    const key = k ? 'MCB:' + k : 'MCB:_idx_' + (mcbIdx++); // blank caseId = always unique
+    const key = r.id ? 'MCB:' + r.id : 'MCB:_idx_' + (mcbIdx++);
     if (seenMCB.has(key)) return false;
     seenMCB.add(key); return true;
   });
   const dedupPR = arr => arr.filter(r => {
-    const k = (r.caseId || r.id || '').trim();
-    const key = k ? 'PR:' + k : 'PR:_idx_' + (prIdx++);
+    const key = r.id ? 'PR:' + r.id : 'PR:_idx_' + (prIdx++);
     if (seenPR.has(key)) return false;
     seenPR.add(key); return true;
   });
