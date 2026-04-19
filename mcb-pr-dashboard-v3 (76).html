@@ -1,0 +1,3543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopee CS MY MCB / PR System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --shopee: #EE4D2D;
+  --shopee-dark: #d94420;
+  --shopee-light: #fff3f0;
+  --bg: #f5f5f5;
+  --surface: #ffffff;
+  --surface2: #fafafa;
+  --border: #e8e8e8;
+  --border2: #d9d9d9;
+  --text: #1a1a1a;
+  --text2: #595959;
+  --text3: #999999;
+  --mono: 'DM Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --radius: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.1), 0 4px 16px rgba(0,0,0,0.06);
+  /* Status colors */
+  --pending: #fa8c16; --pending-bg: #fff7e6; --pending-text: #d46b08;
+  --l1: #1890ff; --l1-bg: #e6f7ff; --l1-text: #096dd9;
+  --l2: #722ed1; --l2-bg: #f9f0ff; --l2-text: #531dab;
+  --l3: #f5222d; --l3-bg: #fff1f0; --l3-text: #cf1322;
+  --resolved: #52c41a; --resolved-bg: #f6ffed; --resolved-text: #389e0d;
+  --rejected: #8c8c8c; --rejected-bg: #fafafa; --rejected-text: #434343;
+  /* Sentiment */
+  --high-risk: #f5222d; --medium-risk: #fa8c16; --low-risk: #52c41a;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* ── NAV ── */
+.nav {
+  background: var(--text);
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.nav-logo {
+  width: 28px; height: 28px;
+  background: var(--shopee);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #fff;
+  letter-spacing: -0.5px;
+}
+.nav-title { color: #fff; font-weight: 600; font-size: 14px; letter-spacing: -0.2px; }
+.nav-sub { color: rgba(255,255,255,0.4); font-size: 11px; font-family: var(--mono); margin-left: 4px; }
+.nav-right { display: flex; align-items: center; gap: 16px; }
+.nav-bpo-tag {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: rgba(255,255,255,0.7);
+}
+.nav-role-select {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #fff;
+  font-family: var(--sans);
+  cursor: pointer;
+}
+.nav-role-select option { background: #1a1917; color: #fff; }
+
+/* ── IDENTITY BAR ── */
+.identity-bar {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 10px 2rem;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.id-label { font-size: 11px; color: var(--text3); font-family: var(--mono); }
+.id-field {
+  display: flex; align-items: center; gap: 8px;
+}
+.id-select, .id-input {
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+}
+.id-select:focus, .id-input:focus { border-color: var(--shopee); }
+.id-sep { color: var(--border2); }
+
+/* ── MAIN ── */
+.main { max-width: 1320px; margin: 0 auto; padding: 1.5rem; }
+
+/* ── TAB BAR ── */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 4px;
+  width: fit-content;
+}
+.tab-btn {
+  padding: 8px 18px;
+  border: none;
+  background: none;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+}
+.tab-btn.active { background: var(--text); color: #fff; }
+.tab-btn:hover:not(.active) { background: var(--bg); color: var(--text); }
+.tab-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+/* ── SUMMARY METRICS ── */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+.metric {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.1rem;
+}
+.metric-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.7px; font-weight: 500; margin-bottom: 6px; }
+.metric-val { font-size: 28px; font-weight: 600; line-height: 1; font-family: var(--mono); color: var(--text); }
+.metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+/* ── LAYOUT ── */
+.layout { display: grid; grid-template-columns: 1fr 340px; gap: 1.25rem; }
+@media(max-width: 1100px) { .layout { grid-template-columns: 1fr; } }
+
+/* ── PANEL ── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+.panel-head {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.panel-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex; align-items: center; gap: 8px;
+}
+.panel-title-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--shopee);
+}
+.panel-actions { display: flex; gap: 8px; align-items: center; }
+
+/* ── FILTERS ── */
+.filters {
+  padding: 10px 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: var(--surface2);
+}
+.filter-select {
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 5px 10px;
+  font-size: 11px;
+  font-family: var(--sans);
+  background: #fff;
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+}
+.filter-select:focus { border-color: var(--shopee); }
+
+/* ── TABLE ── */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fdfcfa; }
+.td-id { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+.td-name { font-weight: 500; color: var(--text); }
+.td-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  font-family: var(--mono);
+}
+.badge-pending   { background: var(--pending-bg);  color: var(--pending-text); }
+.badge-l1        { background: var(--l1-bg);        color: var(--l1-text); }
+.badge-l2        { background: var(--l2-bg);        color: var(--l2-text); }
+.badge-l3        { background: var(--l3-bg);        color: var(--l3-text); }
+.badge-resolved  { background: var(--resolved-bg);  color: var(--resolved-text); }
+.badge-rejected  { background: var(--rejected-bg);  color: var(--rejected-text); }
+.badge-bpo       { background: var(--bg);           color: var(--text2); border: 1px solid var(--border2); }
+.badge-high      { background: #fef2f2; color: #b91c1c; }
+.badge-medium    { background: #fff8ee; color: #9a6800; }
+.badge-low       { background: #f0fdf4; color: #15803d; }
+.badge-buyer     { background: #eff6ff; color: #1d4ed8; }
+.badge-seller    { background: #fdf4ff; color: #7e22ce; }
+
+/* ── ACTION BUTTONS ── */
+.btn {
+  border: none; border-radius: var(--radius); cursor: pointer;
+  font-family: var(--sans); font-weight: 500; font-size: 11px;
+  padding: 5px 12px; transition: all 0.15s;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.btn-primary { background: var(--shopee); color: #fff; }
+.btn-primary:hover { background: var(--shopee-dark); }
+.btn-ghost { background: var(--bg); color: var(--text2); border: 1px solid var(--border2); }
+.btn-ghost:hover { border-color: var(--text2); color: var(--text); }
+.btn-sm { padding: 4px 9px; font-size: 10px; }
+.btn-escalate { background: var(--l2-bg); color: var(--l2-text); border: 1px solid #c4b5fd; }
+.btn-escalate:hover { background: #ede9fe; }
+.btn-resolve { background: var(--resolved-bg); color: var(--resolved-text); border: 1px solid #bbf7d0; }
+.btn-resolve:hover { background: #dcfce7; }
+.btn-reject { background: var(--rejected-bg); color: var(--rejected-text); border: 1px solid #d1d5db; }
+.btn-reject:hover { background: #f3f4f6; }
+
+/* ── SUBMIT FORM PANEL ── */
+.form-panel {
+  display: flex; flex-direction: column; gap: 0;
+}
+.form-section {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.form-section:last-child { border-bottom: none; }
+.form-section-title {
+  font-size: 10px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px;
+}
+.form-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+.form-row:last-child { margin-bottom: 0; }
+.form-label {
+  font-size: 11px; font-weight: 500; color: var(--text2);
+  display: flex; align-items: center; gap: 4px;
+}
+.form-label .req { color: var(--shopee); }
+.form-input, .form-select, .form-textarea {
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 7px 10px;
+  font-size: 12px;
+  font-family: var(--sans);
+  background: #fff;
+  color: var(--text);
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--shopee);
+  box-shadow: 0 0 0 3px rgba(238,77,45,0.08);
+}
+.form-textarea { resize: vertical; min-height: 60px; }
+.form-type-toggle {
+  display: flex; gap: 6px; margin-bottom: 10px;
+}
+.form-type-btn {
+  flex: 1; padding: 8px; border: 1.5px solid var(--border2);
+  border-radius: var(--radius); background: #fff; cursor: pointer;
+  font-family: var(--sans); font-size: 11px; font-weight: 500;
+  color: var(--text2); transition: all 0.15s; text-align: center;
+}
+.form-type-btn.active { border-color: var(--shopee); background: var(--shopee-light); color: var(--shopee); }
+
+/* ── DETAIL DRAWER ── */
+.drawer-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+  z-index: 200; display: none; align-items: stretch; justify-content: flex-end;
+}
+.drawer-overlay.open { display: flex; }
+.drawer {
+  width: 480px; max-width: 95vw;
+  background: var(--surface);
+  height: 100vh;
+  overflow-y: auto;
+  box-shadow: -4px 0 32px rgba(0,0,0,0.12);
+  display: flex; flex-direction: column;
+}
+.drawer-head {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between;
+  position: sticky; top: 0; background: var(--surface); z-index: 10;
+}
+.drawer-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.drawer-sub { font-size: 11px; color: var(--text3); margin-top: 3px; font-family: var(--mono); }
+.drawer-close {
+  background: none; border: none; cursor: pointer;
+  color: var(--text3); font-size: 20px; line-height: 1; padding: 0;
+}
+.drawer-close:hover { color: var(--text); }
+.drawer-body { padding: 1.25rem 1.5rem; flex: 1; }
+.drawer-section { margin-bottom: 1.25rem; }
+.drawer-section-title {
+  font-size: 10px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 8px;
+}
+.dl { display: grid; grid-template-columns: 130px 1fr; gap: 6px 12px; }
+.dl dt { font-size: 11px; color: var(--text3); padding-top: 1px; }
+.dl dd { font-size: 12px; color: var(--text); font-weight: 500; }
+.drawer-actions {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 8px;
+  position: sticky; bottom: 0; background: var(--surface);
+}
+.drawer-action-row { display: flex; gap: 8px; }
+.drawer-note-input {
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 7px 10px;
+  font-size: 12px;
+  font-family: var(--sans);
+  background: #fff;
+  color: var(--text);
+  outline: none;
+  width: 100%;
+}
+.drawer-note-input:focus { border-color: var(--shopee); }
+.escalation-path {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 10px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.esc-step {
+  padding: 4px 10px; border-radius: 4px;
+  font-size: 10px; font-weight: 600; font-family: var(--mono);
+  display: flex; align-items: center; gap: 4px;
+}
+.esc-arrow { color: var(--text3); font-size: 12px; }
+.esc-step.current { outline: 2px solid currentColor; }
+
+/* ── TIMELINE ── */
+.timeline { display: flex; flex-direction: column; gap: 0; }
+.tl-item { display: flex; gap: 12px; padding-bottom: 14px; position: relative; }
+.tl-item:last-child { padding-bottom: 0; }
+.tl-item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 11px; top: 22px; bottom: 0;
+  width: 1px; background: var(--border);
+}
+.tl-dot {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--bg); border: 2px solid var(--border2);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 10px; position: relative; z-index: 1;
+}
+.tl-dot.active { background: var(--shopee); border-color: var(--shopee); }
+.tl-content { flex: 1; padding-top: 2px; }
+.tl-action { font-size: 12px; font-weight: 500; color: var(--text); }
+.tl-meta { font-size: 10px; color: var(--text3); margin-top: 2px; font-family: var(--mono); }
+.tl-note { font-size: 11px; color: var(--text2); margin-top: 4px; font-style: italic; }
+
+/* ── EMPTY STATE ── */
+.empty {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--text3);
+}
+.empty-icon { font-size: 32px; margin-bottom: 8px; opacity: 0.4; }
+.empty-text { font-size: 13px; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 2rem; right: 2rem;
+  background: var(--text); color: #fff;
+  padding: 10px 16px; border-radius: 8px;
+  font-size: 12px; font-weight: 500;
+  box-shadow: var(--shadow-md);
+  z-index: 9999;
+  transform: translateY(100px); opacity: 0;
+  transition: all 0.3s ease;
+  display: flex; align-items: center; gap: 8px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { background: #15803d; }
+.toast.error { background: #b91c1c; }
+
+/* ── TABS CONTENT ── */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── CONFIG MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 300; display: none;
+  align-items: center; justify-content: center; padding: 1rem;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  width: 100%; max-width: 520px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+.modal-head {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-size: 14px; font-weight: 600; }
+.modal-body { padding: 1.5rem; }
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-end; gap: 8px;
+}
+.config-row { margin-bottom: 14px; }
+.config-label { font-size: 11px; font-weight: 500; color: var(--text2); margin-bottom: 4px; }
+.config-hint { font-size: 10px; color: var(--text3); margin-top: 3px; }
+
+/* ── PR KEYWORDS DISPLAY ── */
+.kw-list { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.kw-tag {
+  background: var(--l3-bg); color: var(--l3-text);
+  border: 1px solid #fecaca;
+  padding: 3px 8px; border-radius: 4px;
+  font-size: 10px; font-weight: 500;
+}
+
+/* ── RESPONSIVE HIDE ── */
+@media(max-width: 800px) {
+  .td-hide { display: none; }
+  .nav { padding: 0 1rem; }
+  .main { padding: 1rem; }
+}
+
+/* ── RECAP CARD ── */
+.recap-card {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.recap-card-head {
+  background: #f0fdf4;
+  border-bottom: 1px solid #bbf7d0;
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.recap-card-head.escalated {
+  background: #eff6ff;
+  border-bottom-color: #bfdbfe;
+}
+.recap-card-head.l3 {
+  background: #fff8ee;
+  border-bottom-color: #fed7aa;
+}
+.recap-card-title {
+  font-size: 12px; font-weight: 700; color: var(--text);
+  flex: 1;
+}
+.recap-card-badge {
+  font-size: 10px; font-weight: 600; font-family: var(--mono);
+  padding: 2px 8px; border-radius: 4px;
+}
+.recap-body {
+  padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.recap-row {
+  display: grid; grid-template-columns: 120px 1fr; gap: 6px;
+  font-size: 11px;
+}
+.recap-label { color: var(--text3); font-weight: 500; }
+.recap-value { color: var(--text); font-weight: 500; word-break: break-word; }
+.recap-divider { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+.recap-copy-block {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text2);
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 8px 14px 0;
+}
+.recap-footer {
+  padding: 10px 14px;
+  display: flex; gap: 8px;
+  border-top: 1px solid var(--border);
+}
+.btn-copy {
+  background: var(--text); color: #fff;
+  border: none; border-radius: var(--radius);
+  padding: 6px 14px; font-size: 11px; font-weight: 600;
+  cursor: pointer; font-family: var(--sans);
+  display: flex; align-items: center; gap: 6px;
+  transition: background .15s;
+}
+.btn-copy:hover { background: #333; }
+.btn-copy.copied { background: #15803d; }
+
+/* ── PULSE ANIMATION ── */
+@keyframes pulse-dot {
+  0%   { transform: scale(1);   opacity: 1; }
+  50%  { transform: scale(1.4); opacity: 0.7; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+
+/* ── NAV BUTTON TOOLTIPS ── */
+.nav-right .btn[title] { position: relative; }
+.nav-right .btn[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #1a1917;
+  color: rgba(255,255,255,0.85);
+  font-size: 11px;
+  font-family: var(--sans);
+  font-weight: 400;
+  line-height: 1.5;
+  padding: 7px 10px;
+  border-radius: var(--radius);
+  white-space: nowrap;
+  max-width: 220px;
+  white-space: normal;
+  width: max-content;
+  max-width: 200px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.08);
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* ── SHEET CONFIG NOTICE ── */
+.config-notice {
+  background: linear-gradient(135deg, #fff8ee 0%, #fff3f0 100%);
+  border: 1px solid #fed7aa;
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.config-notice-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.config-notice-text { flex: 1; }
+.config-notice-title { font-size: 12px; font-weight: 600; color: #9a3412; margin-bottom: 3px; }
+.config-notice-body { font-size: 11px; color: #c2410c; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- ── PASSWORD GATE ── -->
+<div id="passwordGate" style="display:none;position:fixed;inset:0;background:#f5f5f5;z-index:9999;display:flex;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;padding:40px;width:100%;max-width:380px;box-shadow:0 4px 24px rgba(0,0,0,0.12);text-align:center">
+    <div style="width:56px;height:56px;background:#EE4D2D;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:36px;height:36px">
+        <path d="M50 18C38 18 28 26 28 37c0 8 5 14 13 18l9 4c5 2 8 5 8 9 0 5-4 8-9 8-7 0-11-4-12-10H24c1 13 11 22 26 22 13 0 23-8 23-20 0-9-5-15-15-19l-8-4c-5-2-7-4-7-8 0-4 3-7 8-7 6 0 9 3 10 8h13c-1-12-10-20-24-20z" fill="#fff"/>
+      </svg>
+    </div>
+    <div style="font-size:18px;font-weight:700;color:#1a1a1a;margin-bottom:4px">Shopee CS MY</div>
+    <div style="font-size:13px;color:#999;margin-bottom:28px">MCB / PR System — Internal Use Only</div>
+    <div style="text-align:left;margin-bottom:8px">
+      <label style="font-size:11px;font-weight:600;color:#595959;text-transform:uppercase;letter-spacing:.6px">Access Password</label>
+    </div>
+    <input id="gatePasswordInput" type="password" placeholder="Enter password…"
+      style="width:100%;padding:10px 14px;border:1.5px solid #d9d9d9;border-radius:6px;font-size:14px;outline:none;margin-bottom:8px;box-sizing:border-box"
+      onfocus="this.style.borderColor='#EE4D2D'"
+      onblur="this.style.borderColor='#d9d9d9'"
+      onkeydown="if(event.key==='Enter')checkGatePassword()">
+    <div id="gatePasswordError" style="display:none;color:#f5222d;font-size:12px;margin-bottom:8px">❌ Incorrect password. Please try again.</div>
+    <button onclick="checkGatePassword()"
+      style="width:100%;padding:11px;background:#EE4D2D;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px"
+      onmouseover="this.style.background='#d94420'" onmouseout="this.style.background='#EE4D2D'">
+      🔓 Unlock
+    </button>
+    <div style="margin-top:16px;font-size:11px;color:#bbb">Contact your Team Leader for access</div>
+  </div>
+</div>
+
+<!-- ── MAIN DASHBOARD (hidden until unlocked) ── -->
+<div id="mainDashboard" style="display:none">
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="nav-logo" style="background:#EE4D2D;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;overflow:hidden;padding:3px">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+        <rect width="100" height="100" rx="12" fill="#EE4D2D"/>
+        <path d="M50 18C38 18 28 26 28 37c0 8 5 14 13 18l9 4c5 2 8 5 8 9 0 5-4 8-9 8-7 0-11-4-12-10H24c1 13 11 22 26 22 13 0 23-8 23-20 0-9-5-15-15-19l-8-4c-5-2-7-4-7-8 0-4 3-7 8-7 6 0 9 3 10 8h13c-1-12-10-20-24-20z" fill="#fff"/>
+      </svg>
+    </div>
+    <span class="nav-title">Shopee CS MY MCB / PR System</span>
+    <span class="nav-sub">v3.0</span>
+    <a href="https://docs.google.com/spreadsheets/d/1ssTv_nTgOANHh4pphM1Lx8CBr4V1uonlSXMGIrGotp4/edit?gid=1453048509#gid=1453048509" target="_blank" style="font-size:11px;color:rgba(255,255,255,0.6);text-decoration:none;border:1px solid rgba(255,255,255,0.2);border-radius:5px;padding:3px 10px;margin-left:8px;white-space:nowrap;transition:all .15s" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,0.5)'" onmouseout="this.style.color='rgba(255,255,255,0.6)';this.style.borderColor='rgba(255,255,255,0.2)'">📋 Review Tracker →</a>
+  </div>
+  <div class="nav-right">
+    <select class="nav-role-select" id="roleSelect" onchange="setRole(this.value)">
+      <option value="TL">Role: SME / Team Leader</option>
+      <option value="SV">Role: STL / SV / OM</option>
+    </select>
+    <select class="nav-role-select" id="bpoSelect" onchange="setBPO(this.value)">
+      <option value="ALL">BPO: All</option>
+      <option value="TCMY">BPO: TCMY</option>
+      <option value="SN">BPO: SN</option>
+      <option value="ePX">BPO: ePX</option>
+      <option value="INS">BPO: INS</option>
+      <option value="IGT">BPO: IGT</option>
+    </select>
+    <button class="btn btn-ghost btn-sm" id="refreshBtn" onclick="manualRefresh()" title="Pull latest data from Google Sheet." style="color:rgba(255,255,255,0.7);border-color:rgba(255,255,255,0.15);background:rgba(255,255,255,0.06)">⟳ Refresh</button>
+    <button class="btn btn-ghost btn-sm" id="resetSyncBtn" onclick="clearLocalCache()" title="Wipe all local cached data and reload everything fresh from Google Sheet." style="color:rgba(255,165,0,0.8);border-color:rgba(255,165,0,0.3);background:rgba(255,165,0,0.06);position:relative">
+      ↺ Reset &amp; Sync
+      <span id="resetSyncDot" style="display:none;position:absolute;top:-4px;right:-4px;width:9px;height:9px;background:#ef4444;border-radius:50%;border:2px solid #1a1917;animation:pulse-dot 1.5s infinite"></span>
+    </button>
+    <button class="btn btn-ghost btn-sm" style="color:#fff;border-color:rgba(255,255,255,0.2)" onclick="openConfig()">⚙ Config</button>
+  </div>
+</nav>
+
+<!-- IDENTITY BAR -->
+<div class="identity-bar">
+  <span class="id-label">LOGGED IN AS</span>
+  <div class="id-field">
+    <input class="id-input" id="agentName" placeholder="Your name" value="" style="width:160px" oninput="saveIdentity()">
+  </div>
+  <span class="id-sep">·</span>
+  <span class="id-label">BPO</span>
+  <div class="id-field">
+    <span id="bpoDisplay" style="font-size:12px;font-weight:600;color:var(--text)">TCMY</span>
+  </div>
+  <span class="id-sep">·</span>
+  <span class="id-label">ROLE</span>
+  <div class="id-field">
+    <span id="roleDisplay" style="font-size:12px;font-weight:600;color:var(--shopee)">L1 Agent</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- Config notice -->
+  <div class="config-notice" id="configNotice">
+    <div class="config-notice-icon">⚠️</div>
+    <div class="config-notice-text">
+      <div class="config-notice-title">Google Sheets not configured</div>
+      <div class="config-notice-body">
+        Click <strong>⚙ Config</strong> (top right) to connect your two Google Sheets. All submissions and updates will sync there. Until configured, data is stored locally in your browser.
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('overview', this)">
+      <div class="tab-dot" style="background:var(--shopee)"></div> Overview
+    </button>
+    <button class="tab-btn" onclick="switchTab('mcb', this)">
+      <div class="tab-dot" style="background:var(--l2)"></div> MCB Requests
+    </button>
+    <button class="tab-btn" onclick="switchTab('pr', this)">
+      <div class="tab-dot" style="background:var(--l3)"></div> PR Triggering
+    </button>
+    <button class="tab-btn" onclick="switchTab('archive', this)">
+      <div class="tab-dot" style="background:var(--rejected)"></div> Archive
+    </button>
+    <button class="tab-btn" onclick="switchTab('stats', this); renderStats()">
+      <div class="tab-dot" style="background:#8b5cf6"></div> Statistics
+    </button>
+  </div>
+
+  <!-- ═══ TAB: OVERVIEW ═══ -->
+  <div class="tab-content active" id="tab-overview">
+    <div class="metrics" id="metricsRow"></div>
+
+    <!-- All BPO Summary (visible only when BPO: All is selected) -->
+    <div class="panel" id="bpoSummaryPanel" style="margin-bottom:1.25rem;display:none">
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-title-dot"></div> All BPO Summary</div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>BPO</th>
+              <th>MCB Total</th><th>Pending</th><th>L1</th><th>L2</th><th>L3</th><th>Resolved</th>
+              <th style="border-left:2px solid var(--border)">PR Total</th>
+              <th>Pending</th><th>L1</th><th>L2</th><th>L3</th><th>Resolved</th>
+            </tr>
+          </thead>
+          <tbody id="bpoSummaryBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><div class="panel-title-dot" style="background:var(--l2)"></div> Recent MCB</div>
+          <button class="btn btn-ghost btn-sm" onclick="switchTab('mcb', document.querySelectorAll('.tab-btn')[1])">View all</button>
+        </div>
+        <div id="recentMCB"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><div class="panel-title-dot" style="background:var(--l3)"></div> Recent PR</div>
+          <button class="btn btn-ghost btn-sm" onclick="switchTab('pr', document.querySelectorAll('.tab-btn')[2])">View all</button>
+        </div>
+        <div id="recentPR"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: MCB ═══ -->
+  <div class="tab-content" id="tab-mcb">
+    <div class="layout">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><div class="panel-title-dot" style="background:var(--l2)"></div> MCB Requests</div>
+          <div class="panel-actions">
+            <button class="btn btn-ghost btn-sm" onclick="exportSheet('mcb')">↓ Export</button>
+          </div>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="mcbFilterStatus" onchange="renderMCBTable()">
+            <option value="">All Status</option>
+            <option value="Pending" selected>Pending</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+          <select class="filter-select" id="mcbFilterBPO" onchange="renderMCBTable()">
+            <option value="">All BPO</option>
+            <option value="TCMY">TCMY</option>
+            <option value="SN">SN</option>
+            <option value="ePX">ePX</option>
+            <option value="INS">INS</option>
+            <option value="IGT">IGT</option>
+          </select>
+          <select class="filter-select" id="mcbFilterSentiment" onchange="renderMCBTable()">
+            <option value="">All Sentiment</option>
+            <option value="Calm">Calm</option>
+            <option value="Frustrated">Frustrated</option>
+            <option value="Irate">Irate</option>
+          </select>
+          <select class="filter-select" id="mcbFilterLayer" onchange="renderMCBTable()">
+            <option value="">All Layers</option>
+            <option value="L1">SME / Team Leader</option>
+            <option value="L2">STL / SV / OM</option>
+            <option value="L3">3rd Layer (Inhouse)</option>
+          </select>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Case ID</th>
+                <th>Requestor</th>
+                <th>BPO</th>
+                <th>Contact Date</th>
+                <th class="td-hide">Sentiment</th>
+                <th class="td-hide">PR Word</th>
+                <th>Layer</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="mcbTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MCB Stats sidebar -->
+      <div style="display:flex;flex-direction:column;gap:1.25rem">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">MCB by Layer</div></div>
+          <div style="padding:1rem 1.25rem" id="mcbLayerStats"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">MCB by BPO</div></div>
+          <div style="padding:1rem 1.25rem" id="mcbBPOStats"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: PR ═══ -->
+  <div class="tab-content" id="tab-pr">
+    <div class="layout">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><div class="panel-title-dot" style="background:var(--l3)"></div> PR Triggering Cases</div>
+          <div class="panel-actions">
+            <button class="btn btn-ghost btn-sm" onclick="exportSheet('pr')">↓ Export</button>
+          </div>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="prFilterStatus" onchange="renderPRTable()">
+            <option value="">All Status</option>
+            <option value="Pending" selected>Pending</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+          <select class="filter-select" id="prFilterBPO" onchange="renderPRTable()">
+            <option value="">All BPO</option>
+            <option value="TCMY">TCMY</option>
+            <option value="SN">SN</option>
+            <option value="ePX">ePX</option>
+            <option value="INS">INS</option>
+            <option value="IGT">IGT</option>
+          </select>
+          <select class="filter-select" id="prFilterSentiment" onchange="renderPRTable()">
+            <option value="">All Sentiment</option>
+            <option value="Calm">Calm</option>
+            <option value="Frustrated">Frustrated</option>
+            <option value="Irate">Irate</option>
+          </select>
+          <select class="filter-select" id="prFilterLayer" onchange="renderPRTable()">
+            <option value="">All Layers</option>
+            <option value="L1">SME / Team Leader</option>
+            <option value="L2">STL / SV / OM</option>
+            <option value="L3">3rd Layer (Inhouse)</option>
+          </select>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Case ID</th>
+                <th>Requestor</th>
+                <th>BPO</th>
+                <th class="td-hide">RC3</th>
+                <th class="td-hide">Sentiment</th>
+                <th>PR Keywords</th>
+                <th>Layer</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="prTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PR Stats sidebar -->
+      <div style="display:flex;flex-direction:column;gap:1.25rem">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">PR by Layer</div></div>
+          <div style="padding:1rem 1.25rem" id="prLayerStats"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">PR by BPO</div></div>
+          <div style="padding:1rem 1.25rem" id="prBPOStats"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: SUBMIT ═══ -->
+  <div class="tab-content" id="tab-submit">
+    <div style="display:grid;grid-template-columns:1fr 380px;gap:1.25rem">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">New Submission</div>
+        </div>
+        <div class="form-panel" id="submitForm">
+
+          <!-- Type Toggle -->
+          <div class="form-section">
+            <div class="form-section-title">Submission Type</div>
+            <div class="form-type-toggle">
+              <button class="form-type-btn active" id="typeMCB" onclick="setFormType('mcb')">MCB Request</button>
+              <button class="form-type-btn" id="typePR" onclick="setFormType('pr')">PR Triggering</button>
+            </div>
+          </div>
+
+          <!-- Common Fields -->
+          <div class="form-section">
+            <div class="form-section-title">Basic Info</div>
+            <div class="form-row">
+              <label class="form-label">Requestor <span class="req">*</span></label>
+              <input class="form-input" id="f_requestor" placeholder="Your name" readonly>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Case ID <span class="req">*</span></label>
+              <input class="form-input" id="f_caseId" placeholder="e.g. CS-2024-00001">
+            </div>
+            <div class="form-row">
+              <label class="form-label">BPO <span class="req">*</span></label>
+              <select class="form-select" id="f_bpo">
+                <option value="TCMY">TCMY</option>
+                <option value="SN">SN</option>
+                <option value="ePX">ePX</option>
+                <option value="INS">INS</option>
+                <option value="IGT">IGT</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Reason Code 3 <span class="req">*</span></label>
+              <input class="form-input" id="f_rc3" placeholder="e.g. RC3-001">
+            </div>
+            <div class="form-row">
+              <label class="form-label">User Sentiment / Risk <span class="req">*</span></label>
+              <select class="form-select" id="f_sentiment">
+                <option value="Calm">Calm</option>
+                <option value="Frustrated">Frustrated</option>
+                <option value="Irate">Irate</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- MCB-only fields -->
+          <div class="form-section" id="mcb-fields">
+            <div class="form-section-title">MCB Details</div>
+            <div class="form-row">
+              <label class="form-label">Date to Contact User <span class="req">*</span></label>
+              <input class="form-input" id="f_contactDate" type="date">
+            </div>
+            <div class="form-row">
+              <label class="form-label">Time to Contact User <span class="req">*</span></label>
+              <input class="form-input" id="f_contactTime" type="time">
+            </div>
+            <div class="form-row">
+              <label class="form-label">PR Word Triggered</label>
+              <input class="form-input" id="f_prWord" placeholder="e.g. sue, lawyer, report...">
+            </div>
+            <div class="form-row">
+              <label class="form-label">Summary / Root Cause <span class="req">*</span></label>
+              <textarea class="form-textarea" id="f_summary" placeholder="Brief summary of the issue and root cause..."></textarea>
+            </div>
+            <div class="form-row">
+              <label class="form-label">MCB Language Preferred <span class="req">*</span></label>
+              <select class="form-select" id="f_language">
+                <option value="English">English</option>
+                <option value="Bahasa Malaysia">Bahasa Malaysia</option>
+                <option value="Mandarin">Mandarin</option>
+                <option value="Thai">Thai</option>
+                <option value="Vietnamese">Vietnamese</option>
+                <option value="Filipino">Filipino</option>
+                <option value="Indonesian">Indonesian</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- PR-only fields -->
+          <div class="form-section" id="pr-fields" style="display:none">
+            <div class="form-section-title">PR Triggering Details</div>
+            <div class="form-row">
+              <label class="form-label">PR-related Keywords / Sentences <span class="req">*</span></label>
+              <textarea class="form-textarea" id="f_prKeywords" placeholder='e.g. "I will post this on Facebook", "I know a lawyer", "I will sue Shopee"...' style="min-height:80px"></textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <button class="btn btn-primary" style="width:100%;justify-content:center;padding:10px" onclick="submitCase()">
+              Submit Case
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submission guide -->
+      <div style="display:flex;flex-direction:column;gap:1.25rem">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Submission Guide</div></div>
+          <div style="padding:1rem 1.25rem;font-size:12px;color:var(--text2);line-height:1.7">
+            <p style="margin-bottom:10px"><strong style="color:var(--text)">MCB (Managed Callback)</strong> — Submit when user requests a callback, or when de-escalation requires a managed contact.</p>
+            <p style="margin-bottom:10px"><strong style="color:var(--text)">PR Triggering</strong> — Submit when user says things that could impact Shopee's public reputation (threats to post on social media, legal threats, media contacts, etc).</p>
+            <hr style="border:none;border-top:1px solid var(--border);margin:10px 0">
+            <p style="margin-bottom:8px;font-weight:500;color:var(--text)">Escalation Flow:</p>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div class="esc-step badge-l1" style="font-size:11px">L1 → SME / Team Leader reviews &amp; processes</div>
+              <div style="font-size:10px;color:var(--text3);padding-left:8px">↓ SME/TL escalates if needed</div>
+              <div class="esc-step badge-l2" style="font-size:11px">L2 → STL / SV / OM reviews</div>
+              <div style="font-size:10px;color:#9a3412;padding-left:8px;font-weight:500">↓ Escalate via SeatTalk Group: <em>Calendar Only - Level 3 Callback Request</em></div>
+              <div class="esc-step badge-l3" style="font-size:11px">L3 → Shopee Inhouse Team</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel" id="myRecentPanel">
+          <div class="panel-head"><div class="panel-title">My Recent Submissions</div></div>
+          <div id="myRecentList" style="padding:0.5rem 0"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: ARCHIVE ═══ -->
+  <div class="tab-content" id="tab-archive">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-title-dot" style="background:var(--rejected)"></div> Resolved Archive</div>
+        <div class="panel-actions">
+          <select class="filter-select" id="archiveFilterDate" onchange="renderArchiveTable()" style="font-size:11px">
+            <option value="">All Dates</option>
+          </select>
+          <select class="filter-select" id="archiveFilterType" onchange="renderArchiveTable()">
+            <option value="">MCB + PR</option>
+            <option value="mcb">MCB Only</option>
+            <option value="pr">PR Only</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="exportArchive()">↓ Export</button>
+        </div>
+      </div>
+      <div style="padding:10px 1.25rem;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;color:var(--text3)">
+        Resolved cases are automatically archived at <strong style="color:var(--text2)">12:00 AM daily</strong>. Each date's batch is kept separately below.
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Archived Date</th>
+              <th>Type</th>
+              <th>Case ID</th>
+              <th>Requestor</th>
+              <th>BPO</th>
+              <th>Resolved By Layer</th>
+              <th>Status</th>
+              <th>Resolved At</th>
+              <th>Outcome</th>
+            </tr>
+          </thead>
+          <tbody id="archiveTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: STATISTICS ═══ -->
+  <div class="tab-content" id="tab-stats">
+    <div style="padding:20px;display:flex;flex-direction:column;gap:20px">
+
+      <!-- Period filter -->
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="font-weight:600;font-size:13px;color:var(--text)">📊 Statistics</span>
+        <select id="statsPeriod" class="filter-select" onchange="renderStats()" style="width:140px">
+          <option value="day">Today</option>
+          <option value="week">This Week</option>
+          <option value="month" selected>This Month</option>
+          <option value="all">All Time</option>
+        </select>
+        <select id="statsType" class="filter-select" onchange="renderStats()" style="width:120px">
+          <option value="all">MCB + PR</option>
+          <option value="mcb">MCB Only</option>
+          <option value="pr">PR Only</option>
+        </select>
+        <span id="statsBPOBadge" style="font-size:11px;font-weight:600;font-family:var(--mono);padding:4px 10px;border-radius:5px;background:var(--bg);border:1px solid var(--border2);color:var(--text2)"></span>
+      </div>
+
+      <!-- Summary cards -->
+      <div id="statsSummaryCards"></div>
+
+      <!-- Row 1: Volume by BPO + Sentiment -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card" style="padding:16px">
+          <div style="font-weight:600;font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">Cases by BPO</div>
+          <div id="statsBPO"></div>
+        </div>
+        <div class="card" style="padding:16px">
+          <div style="font-weight:600;font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">User Sentiment</div>
+          <div id="statsSentiment"></div>
+        </div>
+      </div>
+
+      <!-- Row 2: Top RC3 + Top PR Keywords -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card" style="padding:16px">
+          <div style="font-weight:600;font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">Top 5 Reason Code 3</div>
+          <div id="statsRC3"></div>
+        </div>
+        <div class="card" style="padding:16px">
+          <div style="font-weight:600;font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">Top 5 PR Keywords</div>
+          <div id="statsPRKeywords"></div>
+        </div>
+      </div>
+
+      <!-- Row 3: Manageable Status breakdown -->
+      <div class="card" style="padding:16px">
+        <div style="font-weight:600;font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">Manageable Status Breakdown</div>
+        <div id="statsManageable" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px"></div>
+      </div>
+
+      <!-- Row 4: Daily volume table -->
+      <div class="card" style="padding:16px">
+        <div style="font-weight:600;font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">Volume Summary</div>
+        <div id="statsVolume"></div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- CASE DETAIL DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer(event)">
+  <div class="drawer" id="drawer">
+    <div class="drawer-head">
+      <div>
+        <div class="drawer-title" id="drawerTitle">Case Detail</div>
+        <div class="drawer-sub" id="drawerSub"></div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawerDirect()">×</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+    <div class="drawer-actions" id="drawerActions"></div>
+  </div>
+</div>
+
+<!-- CONFIG MODAL -->
+<div class="modal-overlay" id="configModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">⚙ Google Sheets Configuration</div>
+      <button class="drawer-close" onclick="closeConfig()">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.6">
+        Paste your Google Apps Script Web App URL below. The same script handles both sheets.
+        <a href="#" onclick="showSetupGuide()" style="color:var(--shopee)">How to set this up →</a>
+      </p>
+      <div class="config-row">
+        <div class="config-label">Apps Script Web App URL</div>
+        <input class="form-input" id="configScriptUrl" placeholder="https://script.google.com/macros/s/...">
+        <div class="config-hint">Deploy your Apps Script as a web app and paste the URL here.</div>
+      </div>
+      <div class="config-row">
+        <div class="config-label">MCB Sheet Name (tab name in Google Sheets)</div>
+        <input class="form-input" id="configMCBSheet" placeholder="MCB Request" value="MCB Request">
+      </div>
+      <div class="config-row">
+        <div class="config-label">PR Sheet Name (tab name in Google Sheets)</div>
+        <input class="form-input" id="configPRSheet" placeholder="PR Triggering" value="PR Triggering">
+      </div>
+
+      <!-- Test Connection -->
+      <div style="margin-top:12px">
+        <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="testConnection()">🔍 Test Connection</button>
+      </div>
+      <div id="testResult" style="display:none;margin-top:10px;padding:10px 12px;border-radius:var(--radius);font-size:11px;line-height:1.7"></div>
+
+      <div style="background:var(--bg);border-radius:var(--radius);padding:10px 12px;font-size:11px;color:var(--text2);margin-top:10px;line-height:1.6">
+        <strong>⚠ Deployment checklist:</strong><br>
+        ✓ Execute as: <strong>Me</strong><br>
+        ✓ Who has access: <strong>Anyone</strong> (not "Anyone within Shopee")<br>
+        ✓ Always create a <strong>New version</strong> when redeploying
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeConfig()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveConfig()">Save & Connect</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETUP GUIDE MODAL -->
+<div class="modal-overlay" id="setupModal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-head">
+      <div class="modal-title">📋 Google Sheets Setup Guide</div>
+      <button class="drawer-close" onclick="document.getElementById('setupModal').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body" style="max-height:60vh;overflow-y:auto">
+      <div style="font-size:12px;color:var(--text2);line-height:1.8">
+        <p style="font-weight:600;color:var(--text);margin-bottom:8px">Step 1 — Create your Google Sheet</p>
+        <p style="margin-bottom:12px">Create a new Google Sheet with two tabs named exactly: <code style="background:var(--bg);padding:2px 6px;border-radius:3px">MCB Request</code> and <code style="background:var(--bg);padding:2px 6px;border-radius:3px">PR Triggering</code></p>
+
+        <p style="font-weight:600;color:var(--text);margin-bottom:8px">Step 2 — Open Apps Script</p>
+        <p style="margin-bottom:12px">In your Sheet, go to <strong>Extensions → Apps Script</strong>. Paste the script below, then click Save.</p>
+
+        <pre style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px;font-size:10px;font-family:var(--mono);overflow-x:auto;margin-bottom:12px;white-space:pre-wrap">function doPost(e) {
+  // Receive data from hidden form submission (e.parameter.data)
+  // or direct JSON post (e.postData.contents) — handle both
+  var raw = '';
+  try {
+    raw = e.parameter.data || e.postData.contents || '';
+  } catch(err) { raw = ''; }
+
+  var data;
+  try { data = JSON.parse(raw); } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({error: 'Invalid JSON: ' + raw}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(data.sheet);
+  if (!sheet) return ContentService.createTextOutput(JSON.stringify({error:'Sheet not found: ' + data.sheet}))
+    .setMimeType(ContentService.MimeType.JSON);
+
+  if (data.action === 'append') {
+    sheet.appendRow(data.row);
+    return ContentService.createTextOutput(JSON.stringify({ok:true}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (data.action === 'update') {
+    var rows = sheet.getDataRange().getValues();
+    var headers = rows[0];
+    var caseIdCol = headers.indexOf('Case ID');
+    var statusCol = headers.indexOf('Status') + 1;
+    var layerCol  = headers.indexOf('Layer')  + 1;
+    var notesCol  = headers.indexOf('Notes')  + 1;
+    var updCol    = headers.indexOf('Updated At') + 1;
+    for (var i = 1; i < rows.length; i++) {
+      if (String(rows[i][caseIdCol]) === String(data.caseId)) {
+        if (statusCol) sheet.getRange(i+1, statusCol).setValue(data.status);
+        if (layerCol)  sheet.getRange(i+1, layerCol).setValue(data.layer);
+        if (notesCol && data.note) sheet.getRange(i+1, notesCol).setValue(data.note);
+        if (updCol)    sheet.getRange(i+1, updCol).setValue(data.updatedAt);
+        return ContentService.createTextOutput(JSON.stringify({ok:true}))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+    return ContentService.createTextOutput(JSON.stringify({error:'row not found for caseId: ' + data.caseId}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({error:'unknown action'}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var data = { mcb: [], pr: [] };
+
+  var mcbSheet = ss.getSheetByName('MCB Tracker');
+  if (mcbSheet) {
+    var rows = mcbSheet.getDataRange().getValues();
+    var headers = rows[0];
+    var reqCol = headers.indexOf('Requestor?');
+    for (var i = 1; i < rows.length; i++) {
+      if (!rows[i][reqCol] || String(rows[i][reqCol]).trim() === '') continue;
+      var obj = {};
+      headers.forEach(function(h, j) {
+        var val = rows[i][j];
+        if (val instanceof Date) {
+          obj[h] = Utilities.formatDate(val, Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm:ss');
+        } else {
+          obj[h] = val;
+        }
+      });
+      data.mcb.push(obj);
+    }
+  }
+
+  var prSheet = ss.getSheetByName('PR Triggering Submission');
+  if (prSheet) {
+    var rows2 = prSheet.getDataRange().getValues();
+    var headers2 = rows2[0];
+    var reqCol2 = headers2.indexOf('Requestor?');
+    for (var i = 1; i < rows2.length; i++) {
+      if (!rows2[i][reqCol2] || String(rows2[i][reqCol2]).trim() === '') continue;
+      var obj2 = {};
+      headers2.forEach(function(h, j) {
+        var val = rows2[i][j];
+        if (val instanceof Date) {
+          obj2[h] = Utilities.formatDate(val, Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm:ss');
+        } else {
+          obj2[h] = val;
+        }
+      });
+      // Inject row index as submission date fallback (row 2 = index 1, etc.)
+      if (!obj2['Submitted At'] || String(obj2['Submitted At']).trim() === '') {
+        obj2['_rowIndex'] = i;
+      }
+      data.pr.push(obj2);
+    }
+  }
+
+  var json = JSON.stringify(data);
+  var callback = e && e.parameter && e.parameter.callback;
+  if (callback) {
+    return ContentService.createTextOutput(callback + '(' + json + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(json)
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+
+        <p style="font-weight:600;color:var(--text);margin-bottom:8px">Step 3 — Deploy as Web App</p>
+        <p style="margin-bottom:4px">Click <strong>Deploy → New deployment → Web App</strong></p>
+        <p style="margin-bottom:4px">Set <strong>Execute as:</strong> Me</p>
+        <p style="margin-bottom:12px">Set <strong>Who has access:</strong> Anyone within Shopee</p>
+
+        <p style="font-weight:600;color:var(--text);margin-bottom:8px">Step 4 — Your Sheet Headers (Row 1)</p>
+        <p style="margin-bottom:4px"><strong>MCB Request</strong> tab — exactly as below:</p>
+        <code style="font-size:10px;display:block;background:var(--bg);padding:6px 8px;border-radius:3px;margin-bottom:8px">Requestor? | Date to contact the user? | Time to contact the user? | Case ID | Which BPO? | User Sentiment/Risk? | PR Word Triggered? | Reason Code 3 | Summary/Root cause for MCB | MCB Language Preferred? | Layer | Status | Notes | Submitted At | Updated At</code>
+        <p style="margin-bottom:4px"><strong>PR Triggering</strong> tab — exactly as below:</p>
+        <code style="font-size:10px;display:block;background:var(--bg);padding:6px 8px;border-radius:3px;margin-bottom:8px">Requestor? | Case ID | Reason Code 3 | Which BPO? | User Sentiment/Risk? | PR-related keywords or sentences? | Layer | Status | Notes | Submitted At | Updated At</code>
+
+        <p style="font-weight:600;color:var(--text);margin-bottom:8px">Step 5 — Copy the URL</p>
+        <p>After deploying, copy the <strong>Web App URL</strong> and paste it in the Config screen of this dashboard.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="document.getElementById('setupModal').classList.remove('open')">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- PASSWORD MODAL -->
+<div class="modal-overlay" id="passwordModal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-head">
+      <div class="modal-title">🔒 Admin Access Required</div>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.6">
+        Viewing all BPOs requires admin access. Please enter the password to continue.
+      </p>
+      <div class="config-row">
+        <div class="config-label">Password</div>
+        <input class="form-input" id="bpoPasswordInput" type="password" placeholder="Enter password…" onkeydown="if(event.key==='Enter')confirmBPOPassword()">
+        <div id="bpoPasswordError" style="display:none;margin-top:6px;font-size:11px;color:#b91c1c">❌ Incorrect password. Please try again.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cancelBPOPassword()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmBPOPassword()">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const HARDCODED_SCRIPT_URL = 'https://script.google.com/a/macros/shopeemobile-external.com/s/AKfycbzYSJgmFNd9jEIKyjHqoHEzeXMwtMalegrNXeuqotEhr7vaYbP-Xno5fpXNM6Edr0kD/exec';
+const APP_VERSION = '3.8'; // bump this when distributing a new file version
+
+let state = {
+  role: 'TL',
+  bpo: 'TCMY',
+  agentName: '',
+  scriptUrl: HARDCODED_SCRIPT_URL,
+  mcbSheetName: 'MCB Tracker',
+  prSheetName: 'PR Triggering Submission',
+  mcb: [],
+  pr: []
+};
+
+// Load from localStorage
+function loadState() {
+  const saved = localStorage.getItem('mcbpr_config');
+  // Always use hardcoded URL — never lose it
+  state.scriptUrl = HARDCODED_SCRIPT_URL;
+  if (saved) {
+    try {
+      const c = JSON.parse(saved);
+      state.mcbSheetName = c.mcbSheetName || 'MCB Tracker';
+      state.prSheetName  = c.prSheetName  || 'PR Triggering Submission';
+      state.agentName    = c.agentName    || '';
+      state.role         = (c.role === 'L1' || !c.role) ? 'TL' : c.role;
+      state.bpo          = c.bpo          || 'TCMY';
+    } catch(e) {}
+  }
+  // Always reflect hardcoded URL in config modal
+  const scriptUrlEl = document.getElementById('configScriptUrl');
+  if (scriptUrlEl) scriptUrlEl.value = HARDCODED_SCRIPT_URL;
+  const mcbSheetEl = document.getElementById('configMCBSheet');
+  if (mcbSheetEl) mcbSheetEl.value = state.mcbSheetName;
+  const prSheetEl = document.getElementById('configPRSheet');
+  if (prSheetEl) prSheetEl.value = state.prSheetName;
+  const agentNameEl = document.getElementById('agentName');
+  if (agentNameEl) agentNameEl.value = state.agentName;
+  const roleSelectEl = document.getElementById('roleSelect');
+  if (roleSelectEl) roleSelectEl.value = state.role;
+  const bpoSelectEl = document.getElementById('bpoSelect');
+  if (bpoSelectEl) bpoSelectEl.value = state.bpo;
+  const bpoDisplayEl = document.getElementById('bpoDisplay');
+  if (bpoDisplayEl) bpoDisplayEl.textContent = state.bpo === 'ALL' ? 'All BPOs' : state.bpo;
+  const roleDisplayEl = document.getElementById('roleDisplay');
+  if (roleDisplayEl) roleDisplayEl.textContent = roleLabel(state.role);
+
+  const localMCB = localStorage.getItem('mcbpr_mcb');
+  const localPR  = localStorage.getItem('mcbpr_pr');
+  if (localMCB) state.mcb = JSON.parse(localMCB);
+  if (localPR)  state.pr  = JSON.parse(localPR);
+
+  // Always auto-connect since URL is hardcoded
+  const noticeEl = document.getElementById('configNotice');
+  if (noticeEl) noticeEl.style.display = 'none';
+  loadFromSheet();
+}
+
+function saveIdentity() {
+  state.agentName = document.getElementById('agentName').value;
+  persistConfig();
+}
+
+function setRole(r) {
+  state.role = r;
+  document.getElementById('roleDisplay').textContent = roleLabel(r);
+  persistConfig();
+  renderAll();
+}
+
+// Change this password to whatever you want
+const ALL_BPO_PASSWORD = 'shopeecsmy2025';
+const GATE_PASSWORD = 'shopeecsmy2025'; // change this to your desired access password
+
+function checkGatePassword() {
+  const input = document.getElementById('gatePasswordInput');
+  const error = document.getElementById('gatePasswordError');
+  if (input.value === GATE_PASSWORD) {
+    // Save unlock in sessionStorage (clears when browser tab closes)
+    sessionStorage.setItem('mcbpr_unlocked', '1');
+    document.getElementById('passwordGate').style.display = 'none';
+    document.getElementById('mainDashboard').style.display = 'block';
+    error.style.display = 'none';
+  } else {
+    error.style.display = 'block';
+    input.value = '';
+    input.focus();
+  }
+}
+
+function initGate() {
+  // If already unlocked this session, skip gate
+  if (sessionStorage.getItem('mcbpr_unlocked') === '1') {
+    document.getElementById('passwordGate').style.display = 'none';
+    document.getElementById('mainDashboard').style.display = 'block';
+  } else {
+    document.getElementById('passwordGate').style.display = 'flex';
+    document.getElementById('mainDashboard').style.display = 'none';
+    setTimeout(() => document.getElementById('gatePasswordInput').focus(), 100);
+  }
+}
+
+// Run gate check immediately
+initGate();
+
+function setBPO(b) {
+  if (b === 'ALL') {
+    // Intercept — show password modal instead of switching immediately
+    document.getElementById('passwordModal').classList.add('open');
+    document.getElementById('bpoPasswordInput').value = '';
+    document.getElementById('bpoPasswordError').style.display = 'none';
+    setTimeout(() => document.getElementById('bpoPasswordInput').focus(), 100);
+    return;
+  }
+  applyBPO(b);
+}
+
+function applyBPO(b) {
+  state.bpo = b;
+  document.getElementById('bpoDisplay').textContent = b === 'ALL' ? 'All BPOs' : b;
+  document.getElementById('bpoSelect').value = b;
+  persistConfig();
+  renderAll();
+}
+
+function confirmBPOPassword() {
+  const entered = document.getElementById('bpoPasswordInput').value;
+  if (entered === ALL_BPO_PASSWORD) {
+    document.getElementById('passwordModal').classList.remove('open');
+    document.getElementById('bpoPasswordInput').value = '';
+    applyBPO('ALL');
+    showToast('✓ Admin access granted — viewing all BPOs', 'success');
+  } else {
+    document.getElementById('bpoPasswordError').style.display = 'block';
+    document.getElementById('bpoPasswordInput').value = '';
+    document.getElementById('bpoPasswordInput').focus();
+  }
+}
+
+function cancelBPOPassword() {
+  document.getElementById('passwordModal').classList.remove('open');
+  document.getElementById('bpoPasswordInput').value = '';
+  document.getElementById('bpoPasswordError').style.display = 'none';
+  // Revert dropdown back to current BPO
+  document.getElementById('bpoSelect').value = state.bpo;
+}
+
+function roleLabel(r) {
+  return {TL:'SME / Team Leader', SV:'STL / SV / OM'}[r] || r;
+}
+
+function persistConfig() {
+  localStorage.setItem('mcbpr_config', JSON.stringify({
+    scriptUrl: state.scriptUrl,
+    mcbSheetName: state.mcbSheetName,
+    prSheetName: state.prSheetName,
+    agentName: state.agentName,
+    role: state.role,
+    bpo: state.bpo
+  }));
+}
+
+function saveLocalData() {
+  localStorage.setItem('mcbpr_mcb', JSON.stringify(state.mcb));
+  localStorage.setItem('mcbpr_pr', JSON.stringify(state.pr));
+}
+
+// ═══════════════════════════════════════════════════════
+// GOOGLE SHEETS SYNC
+// ═══════════════════════════════════════════════════════
+// ── PENDING OVERRIDES ──────────────────────────────────
+// When a dashboard action is saved (but sheet not yet manually updated),
+// we store the override here keyed by caseId. On every sheet refresh,
+// these overrides are re-applied on top of the incoming sheet data.
+// An override is only cleared once the sheet itself returns the updated
+// status/layer (i.e. the user has manually updated the sheet).
+let pendingOverrides = { mcb: {}, pr: {} };
+
+function savePendingOverrides() {
+  localStorage.setItem('mcbpr_overrides', JSON.stringify(pendingOverrides));
+}
+function loadPendingOverrides() {
+  const raw = localStorage.getItem('mcbpr_overrides');
+  if (raw) try { pendingOverrides = JSON.parse(raw); } catch(e) {}
+}
+
+function setPendingOverride(type, caseId, fields) {
+  if (!pendingOverrides[type]) pendingOverrides[type] = {};
+  pendingOverrides[type][caseId] = { ...pendingOverrides[type][caseId], ...fields };
+  savePendingOverrides();
+}
+
+function applyPendingOverrides(type, rows) {
+  const overrides = pendingOverrides[type] || {};
+  return rows.map(row => {
+    const ov = overrides[row.caseId];
+    if (!ov) return row;
+
+    // If sheet has a real MCB Status value — sheet is source of truth, clear override
+    if (row.manageableStatus || row.status !== 'Pending') {
+      delete pendingOverrides[type][row.caseId];
+      savePendingOverrides();
+      return row;
+    }
+
+    // Sheet still empty — keep local override
+    return { ...row, ...ov };
+  });
+}
+
+function mergeSheetWithLocal(sheetRows, localRows) {
+  // Preserve local timeline (not stored in sheet) keyed by caseId
+  const localMap = {};
+  (localRows || []).forEach(r => { if (r.caseId) localMap[r.caseId] = r; });
+  return sheetRows.map(sheetRow => ({
+    ...sheetRow,
+    timeline: (localMap[sheetRow.caseId] || {}).timeline || []
+  }));
+}
+
+async function loadFromSheet() {
+  if (!state.scriptUrl) return;
+  try {
+    const data = await new Promise((resolve, reject) => {
+      const cbName = '_gsCallback_' + Date.now();
+      const url = state.scriptUrl + '?callback=' + cbName + '&ts=' + Date.now();
+      window[cbName] = (d) => { delete window[cbName]; script.remove(); resolve(d); };
+      const script = document.createElement('script');
+      script.src = url;
+      script.onerror = () => { delete window[cbName]; script.remove(); reject(new Error('Script load failed')); };
+      setTimeout(() => { if (window[cbName]) { delete window[cbName]; script.remove(); reject(new Error('Timeout')); } }, 10000);
+      document.head.appendChild(script);
+    });
+    if (data.mcb) {
+      const merged = mergeSheetWithLocal(data.mcb.map(normalizeRow), state.mcb);
+      state.mcb = applyPendingOverrides('mcb', merged);
+    }
+    if (data.pr) {
+      const merged = mergeSheetWithLocal(data.pr.map(normalizeRow), state.pr);
+      state.pr = applyPendingOverrides('pr', merged);
+    }
+    saveLocalData();
+    buildArchiveFromState();
+    renderAll();
+    showToast('✓ Synced with Google Sheets', 'success');
+  } catch(e) {
+    try {
+      const res = await fetch(state.scriptUrl + '?ts=' + Date.now());
+      const data = await res.json();
+      if (data.mcb) {
+        const merged = mergeSheetWithLocal(data.mcb.map(normalizeRow), state.mcb);
+        state.mcb = applyPendingOverrides('mcb', merged);
+      }
+      if (data.pr) {
+        const merged = mergeSheetWithLocal(data.pr.map(normalizeRow), state.pr);
+        state.pr = applyPendingOverrides('pr', merged);
+      }
+      saveLocalData();
+      buildArchiveFromState();
+      renderAll();
+      showToast('✓ Synced with Google Sheets', 'success');
+    } catch(e2) {
+      console.error('Sync error:', e2);
+      showToast('Sync failed — check your Script URL and deployment settings', 'error');
+    }
+  }
+}
+
+// ── MY date parser ──────────────────────────────────────
+// Google Sheets returns dates in many formats depending on locale and cell type:
+//   - DD/MM/YYYY, H:MM:SS am/pm  (en-MY locale string)
+//   - M/D/YYYY H:MM:SS  (US locale from Apps Script toString)
+//   - ISO: 2026-04-18T...
+//   - Google Sheets serial number (days since 30 Dec 1899)
+function parseMYDate(str) {
+  if (!str) return null;
+  const s = String(str).trim();
+  if (!s) return null;
+
+  // 1. ISO format: 2026-04-18 or 2026-04-18T10:00:00...
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+    const d = new Date(s);
+    if (!isNaN(d)) return d;
+  }
+
+  // 2. Google Sheets serial number (numeric, e.g. 46130 = 18 Apr 2026)
+  //    Sheets epoch: 30 Dec 1899. Serial 1 = 1 Jan 1900.
+  if (/^\d{4,6}(\.\d+)?$/.test(s)) {
+    const serial = parseFloat(s);
+    if (serial > 40000 && serial < 60000) { // sanity range: ~2009-2064
+      const msPerDay = 86400000;
+      // Sheets has a leap-year bug: treats 1900 as leap year, so offset by 2 days before 1 Mar 1900
+      const epoch = new Date(Date.UTC(1899, 11, 30));
+      const d = new Date(epoch.getTime() + serial * msPerDay);
+      if (!isNaN(d)) return d;
+    }
+  }
+
+  // 3. DD/MM/YYYY [, H:MM[:SS] [am/pm]]  — en-MY locale (Google Sheets)
+  const dmy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[,\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*([aApP][mM])?)?/);
+  if (dmy) {
+    const [, dStr, moStr, yStr, hStr, minStr, secStr, ampm] = dmy;
+    const day = parseInt(dStr, 10), mo = parseInt(moStr, 10), yr = parseInt(yStr, 10);
+    if (mo >= 1 && mo <= 12 && day >= 1 && day <= 31) {
+      let h = parseInt(hStr || '0', 10);
+      const min = parseInt(minStr || '0', 10), sec = parseInt(secStr || '0', 10);
+      if (ampm) { const ap = ampm.toLowerCase(); if (ap==='pm'&&h<12) h+=12; if (ap==='am'&&h===12) h=0; }
+      const d = new Date(yr, mo - 1, day, h, min, sec);
+      if (!isNaN(d) && d.getFullYear() === yr) return d;
+    }
+  }
+
+  // 4. M/D/YYYY H:MM:SS  — Apps Script US locale toString
+  const mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[,\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*([aApP][mM])?)?/);
+  if (mdy) {
+    // Same regex as above — already tried as DD/MM. Try as MM/DD if day > 12 failed
+    const [, p1, p2, yStr, hStr, minStr, secStr, ampm] = mdy;
+    const yr = parseInt(yStr, 10);
+    // If p1 <= 12 and p2 > 12, then p1=month, p2=day
+    const mo = parseInt(p1, 10), day = parseInt(p2, 10);
+    if (mo >= 1 && mo <= 12 && day >= 1 && day <= 31) {
+      let h = parseInt(hStr || '0', 10);
+      const min = parseInt(minStr || '0', 10), sec = parseInt(secStr || '0', 10);
+      if (ampm) { const ap = ampm.toLowerCase(); if (ap==='pm'&&h<12) h+=12; if (ap==='am'&&h===12) h=0; }
+      const d = new Date(yr, mo - 1, day, h, min, sec);
+      if (!isNaN(d) && d.getFullYear() === yr) return d;
+    }
+  }
+
+  // 5. Fallback: native JS parse
+  const native = new Date(s);
+  return isNaN(native) ? null : native;
+}
+
+function normalizeRow(r) {
+  // ── Date extraction ──────────────────────────────────
+  // Instead of relying on exact column names (which vary by sheet setup),
+  // scan ALL fields in the row for any parseable date value.
+  // Priority: known date columns first, then any other field.
+  let updatedISO = '';
+
+  // 1. Explicit known columns in priority order
+  const dateCandidateKeys = [
+    'Auto Date', 'Auto date', 'auto date',  // ← PR column O — checked first
+    'Updated At', 'Submitted At', 'Date to contact the user?',
+    'Updated at', 'Submitted at', 'submittedAt', 'updatedAt'
+  ];
+  for (const key of dateCandidateKeys) {
+    if (r[key]) {
+      const d = parseMYDate(r[key]);
+      if (d) { updatedISO = d.toISOString(); break; }
+    }
+  }
+
+  // 2. Scan recap text for Date/Time: DD/MM/YYYY pattern
+  if (!updatedISO) {
+    const recap = r['MCB Summary Post OBC'] || r['MCB Summary Post MCB'] || '';
+    const dateMatch = recap.match(/Date\/Time\s*:\s*(\d{2}\/\d{2}\/\d{4})/);
+    if (dateMatch) {
+      const [dd, mm, yyyy] = dateMatch[1].split('/');
+      const parsed = new Date(`${yyyy}-${mm}-${dd}`);
+      if (!isNaN(parsed)) updatedISO = parsed.toISOString();
+    }
+  }
+
+  // 3. Scan EVERY field value in the row for a parseable date
+  //    (catches whatever column name the Apps Script actually uses)
+  if (!updatedISO) {
+    for (const val of Object.values(r)) {
+      if (!val || typeof val !== 'string') continue;
+      // Only try strings that look like dates (contain / or - with digits)
+      if (!/\d{2}[\/\-]\d{2}[\/\-]\d{4}|\d{4}-\d{2}-\d{2}/.test(val)) continue;
+      const d = parseMYDate(val);
+      if (d && d.getFullYear() >= 2020 && d.getFullYear() <= 2099) {
+        updatedISO = d.toISOString();
+        break;
+      }
+    }
+  }
+
+  // 4. Absolute last resort: use right now (row is live in sheet = active/recent)
+  if (!updatedISO) updatedISO = new Date().toISOString();
+
+  // ── Submitted At ─────────────────────────────────────
+  const rawSubmitted = r['Submitted At'] || r['Submitted at'] || r['submitted_at'] || '';
+  const submittedISO = rawSubmitted ? (parseMYDate(rawSubmitted)?.toISOString() || updatedISO) : updatedISO;
+
+  const caseId = String(r['Case ID'] || '').trim();
+
+  const uniqueId = caseId || [r['Requestor?'], r['Submitted At'], r['Which BPO?']].join('|') || Math.random().toString(36).substr(2,9);
+
+  // Apps Script sends duplicate headers as: 'Manageable Status' (L1) and 'Manageable Status_2' (L2)
+  // MCB Status = "Resolved" or "Not Resolved"
+  const mcbStatus  = String(r['MCB Status']          || '').trim().toLowerCase();
+  const ms1        = String(r['Manageable Status']    || '').trim().toLowerCase(); // L1 SME/TL
+  const ms2        = String(r['Manageable Status_2']  || '').trim().toLowerCase(); // L2 STL/SV/OM
+
+  let status = 'Pending';
+  let layer  = 'L1';
+
+  // MCB Status is the source of truth for resolved/rejected
+  if (mcbStatus === 'resolved') {
+    status = 'Resolved';
+    layer  = ms2 ? 'L2' : 'L1';
+  } else if (mcbStatus === 'rejected' || ms1.includes('invalid')) {
+    status = 'Rejected';
+    layer  = 'L1';
+  } else if (ms2.includes('3rd') || ms2.includes('3d') || ms2.includes('inhouse')) {
+    status = 'L3 Review'; layer = 'L3';
+  } else if (ms2 && ms2 !== '') {
+    status = 'L2 Review'; layer = 'L2';
+  } else if (ms1.includes('2nd') || ms1.includes('stl') || ms1.includes('sv')) {
+    status = 'L2 Review'; layer = 'L2';
+  } else if (ms1.includes('3rd') || ms1.includes('3d') || ms1.includes('inhouse')) {
+    status = 'L3 Review'; layer = 'L3';
+  } else if (ms1.includes('manageable')) {
+    status = 'Resolved';
+    layer  = 'L1';
+  }
+
+  return {
+    id: uniqueId,
+    requestor: r['Requestor?'] || '',
+    bpo: r['Which BPO?'] || '',
+    caseId: caseId,
+    rc3: r['Reason Code 3'] || '',
+    sentiment: r['User Sentiment/Risk?'] || '',
+    layer,
+    status,
+    notes: r['Notes'] || '',
+    submittedAt: submittedISO,
+    updatedAt: updatedISO,
+    contactDate: r['Date to contact the user?'] || '',
+    contactTime: r['Time to contact the user?'] || '',
+    prWord: r['PR Word Triggered?'] || '',
+    summary: r['Summary/Root cause for MCB'] || '',
+    language: r['MCB Language Preferred?'] || '',
+    prKeywords: r['PR-related keywords or sentences?'] || '',
+    handledBy: r['Handled By'] || '',
+    manageableStatus: r['Manageable Status'] || '',
+    manageableStatus2: r['Manageable Status_2'] || '',
+    postMcbSummary: r['MCB Summary Post MCB'] || '',
+    timeline: []
+  };
+}
+
+function postToSheet(sheetName, action, payload) {
+  if (!state.scriptUrl) return;
+
+  const cbName = '_gsPost_' + Date.now();
+  const params = new URLSearchParams();
+  params.set('callback', cbName);
+  params.set('method', 'update');
+  params.set('sheet', sheetName);
+  params.set('action', action);
+  Object.entries(payload).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') {
+      // Limit recap to 2000 chars to avoid URL length issues
+      const val = k === 'recap' ? String(v).substring(0, 2000) : String(v);
+      params.set(k, val);
+    }
+  });
+  params.set('ts', Date.now());
+
+  const url = state.scriptUrl + '?' + params.toString();
+
+  window[cbName] = (result) => {
+    delete window[cbName];
+    if (script.parentNode) script.remove();
+    if (result && result.ok) {
+      showToast('✓ Google Sheet updated — row ' + result.row, 'success');
+    } else {
+      const msg = (result && result.error) ? result.error : 'unknown';
+      showToast('⚠ Sheet not updated: ' + msg, 'error');
+    }
+  };
+
+  const script = document.createElement('script');
+  script.src = url;
+  script.onerror = () => {
+    delete window[cbName];
+    if (script.parentNode) script.remove();
+    showToast('⚠ Sheet update failed', 'error');
+  };
+  setTimeout(() => {
+    if (window[cbName]) {
+      delete window[cbName];
+      if (script.parentNode) script.remove();
+      showToast('⚠ Sheet update timed out', 'error');
+    }
+  }, 15000);
+
+  document.head.appendChild(script);
+}
+
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
+function updateSummaryCounter(textarea) {
+  const counter = document.getElementById('summaryCounter');
+  if (!counter) return;
+  const len = textarea.value.length;
+  const max = 1700;
+  const remaining = max - len;
+  if (len === 0) {
+    counter.textContent = '0 / 1700 chars';
+    counter.style.color = 'var(--text3)';
+    counter.style.fontWeight = 'normal';
+  } else if (remaining < 0) {
+    counter.textContent = `⚠ ${Math.abs(remaining)} chars over limit — please shorten`;
+    counter.style.color = '#ef4444';
+    counter.style.fontWeight = '600';
+  } else if (remaining < 200) {
+    counter.textContent = `${len} / 1700 — ${remaining} remaining`;
+    counter.style.color = '#f59e0b';
+    counter.style.fontWeight = '600';
+  } else {
+    counter.textContent = `${len} / 1700 chars`;
+    counter.style.color = 'var(--text3)';
+    counter.style.fontWeight = 'normal';
+  }
+}
+
+function openConfig() { document.getElementById('configModal').classList.add('open'); }
+
+function manualRefresh() {
+  const drawerOpen = document.getElementById('drawerOverlay')?.classList.contains('open');
+  if (drawerOpen) {
+    showToast('⚠ Close the action drawer before refreshing', 'error');
+    return;
+  }
+  const btn = document.getElementById('refreshBtn');
+  btn.textContent = '⟳ Syncing…';
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  loadFromSheet().finally(() => {
+    btn.textContent = '⟳ Refresh';
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  });
+}
+
+function debugSheet() {
+  if (!state.scriptUrl) { alert('No script URL configured'); return; }
+  const cbName = '_debug_' + Date.now();
+  const url = state.scriptUrl + '?callback=' + cbName + '&ts=' + Date.now();
+  window[cbName] = (data) => {
+    delete window[cbName];
+    script.remove();
+    // Show first MCB row keys and values
+    const firstMCB = data.mcb && data.mcb[0];
+    const firstPR  = data.pr  && data.pr[0];
+    let msg = '=== FIRST MCB ROW KEYS ===\n';
+    if (firstMCB) {
+      Object.keys(firstMCB).forEach(k => {
+        msg += k + ' = ' + JSON.stringify(firstMCB[k]) + '\n';
+      });
+    } else {
+      msg += '(no MCB rows)\n';
+    }
+    msg += '\n=== FIRST PR ROW KEYS ===\n';
+    if (firstPR) {
+      Object.keys(firstPR).forEach(k => {
+        msg += k + ' = ' + JSON.stringify(firstPR[k]) + '\n';
+      });
+    } else {
+      msg += '(no PR rows)\n';
+    }
+    alert(msg);
+  };
+  const script = document.createElement('script');
+  script.src = url;
+  script.onerror = () => { delete window[cbName]; script.remove(); alert('Failed to load data'); };
+  setTimeout(() => { if (window[cbName]) { delete window[cbName]; script.remove(); alert('Timed out'); } }, 10000);
+  document.head.appendChild(script);
+}
+function clearLocalCache() {
+  if (!confirm('Clear all local cached data and reload from sheet?')) return;
+  localStorage.removeItem('mcbpr_mcb');
+  localStorage.removeItem('mcbpr_pr');
+  localStorage.removeItem('mcbpr_overrides');
+  localStorage.removeItem('mcbpr_recaps');
+  localStorage.setItem('mcbpr_last_sync_version', APP_VERSION);
+  state.mcb = [];
+  state.pr  = [];
+  pendingOverrides = { mcb: {}, pr: {} };
+  hideResetDot();
+  renderAll();
+  loadFromSheet();
+  showToast('✓ Cache cleared — reloading from sheet', 'success');
+}
+
+function showResetDot() {
+  const dot = document.getElementById('resetSyncDot');
+  const btn = document.getElementById('resetSyncBtn');
+  if (dot) dot.style.display = 'block';
+  if (btn) {
+    btn.style.color = 'rgba(239,68,68,0.9)';
+    btn.style.borderColor = 'rgba(239,68,68,0.4)';
+    btn.style.background = 'rgba(239,68,68,0.08)';
+    btn.title = '⚠ Your local data may be outdated. Click to reset and sync fresh data from Google Sheet.';
+  }
+}
+
+function hideResetDot() {
+  const dot = document.getElementById('resetSyncDot');
+  const btn = document.getElementById('resetSyncBtn');
+  if (dot) dot.style.display = 'none';
+  if (btn) {
+    btn.style.color = 'rgba(255,165,0,0.8)';
+    btn.style.borderColor = 'rgba(255,165,0,0.3)';
+    btn.style.background = 'rgba(255,165,0,0.06)';
+    btn.title = 'Wipe all local cached data and reload everything fresh from Google Sheet. Use when data looks stuck or out of sync.';
+  }
+}
+
+function checkResetNeeded() {
+  const lastVersion = localStorage.getItem('mcbpr_last_sync_version') || '';
+  if (lastVersion !== APP_VERSION) {
+    showResetDot();
+  }
+}
+function showSetupGuide() {
+  document.getElementById('configModal').classList.remove('open');
+  document.getElementById('setupModal').classList.add('open');
+}
+
+async function testConnection() {
+  const url = document.getElementById('configScriptUrl').value.trim();
+  const resultEl = document.getElementById('testResult');
+  resultEl.style.display = 'block';
+
+  if (!url) {
+    resultEl.style.background = '#fef2f2';
+    resultEl.style.border = '1px solid #fecaca';
+    resultEl.style.color = '#b91c1c';
+    resultEl.innerHTML = '❌ No URL entered. Paste your Apps Script Web App URL first.';
+    return;
+  }
+
+  if (!url.includes('script.google.com')) {
+    resultEl.style.background = '#fef2f2';
+    resultEl.style.border = '1px solid #fecaca';
+    resultEl.style.color = '#b91c1c';
+    resultEl.innerHTML = '❌ URL does not look like an Apps Script URL.<br>It should start with <code>https://script.google.com/macros/s/...</code>';
+    return;
+  }
+
+  resultEl.style.background = '#fff8ee';
+  resultEl.style.border = '1px solid #fed7aa';
+  resultEl.style.color = '#9a3412';
+  resultEl.innerHTML = '⏳ Testing connection…';
+
+  try {
+    const data = await new Promise((resolve, reject) => {
+      const cbName = '_testCb_' + Date.now();
+      const testUrl = url + '?callback=' + cbName + '&ts=' + Date.now();
+      window[cbName] = (d) => { delete window[cbName]; script.remove(); resolve(d); };
+      const script = document.createElement('script');
+      script.src = testUrl;
+      script.onerror = () => { delete window[cbName]; script.remove(); reject(new Error('Script failed to load — check that "Who has access" is set to Anyone (not Anyone within Shopee)')); };
+      setTimeout(() => { if (window[cbName]) { delete window[cbName]; script.remove(); reject(new Error('Request timed out after 10s')); } }, 10000);
+      document.head.appendChild(script);
+    });
+
+    const mcbCount = (data.mcb || []).length;
+    const prCount  = (data.pr  || []).length;
+    resultEl.style.background = '#f0fdf4';
+    resultEl.style.border = '1px solid #bbf7d0';
+    resultEl.style.color = '#15803d';
+    resultEl.innerHTML = `✅ Connection successful!<br>
+      Found <strong>${mcbCount}</strong> MCB row(s) and <strong>${prCount}</strong> PR row(s) in your Sheet.<br>
+      ${mcbCount === 0 && prCount === 0 ? '<span style="color:#9a6800">⚠ Sheet appears empty — make sure headers are in Row 1.</span>' : ''}`;
+  } catch(err) {
+    resultEl.style.background = '#fef2f2';
+    resultEl.style.border = '1px solid #fecaca';
+    resultEl.style.color = '#b91c1c';
+    resultEl.innerHTML = `❌ <strong>Connection failed</strong><br>${err.message}<br><br>
+      <strong>Things to check:</strong><br>
+      1. "Who has access" must be <strong>Anyone</strong> (not Anyone within Shopee)<br>
+      2. "Execute as" must be <strong>Me</strong><br>
+      3. You must click <strong>New version</strong> when redeploying<br>
+      4. Copy the URL from the deployment screen (not the editor URL)`;
+  }
+}
+function saveConfig() {
+  state.scriptUrl    = HARDCODED_SCRIPT_URL; // always use hardcoded URL
+  state.mcbSheetName = document.getElementById('configMCBSheet').value.trim();
+  state.prSheetName  = document.getElementById('configPRSheet').value.trim();
+  persistConfig();
+  closeConfig();
+  document.getElementById('configNotice').style.display = 'none';
+  loadFromSheet();
+  showToast('Config saved!', 'success');
+}
+
+// ═══════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  renderAll();
+}
+
+// ═══════════════════════════════════════════════════════
+// FORM
+// ═══════════════════════════════════════════════════════
+let currentFormType = 'mcb';
+function setFormType(type) {
+  currentFormType = type;
+  document.getElementById('typeMCB').classList.toggle('active', type === 'mcb');
+  document.getElementById('typePR').classList.toggle('active', type === 'pr');
+  document.getElementById('mcb-fields').style.display = type === 'mcb' ? 'block' : 'none';
+  document.getElementById('pr-fields').style.display = type === 'pr' ? 'block' : 'none';
+}
+
+function genId(prefix) {
+  return prefix + '-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2,4).toUpperCase();
+}
+
+function submitCase() {
+  const name = document.getElementById('f_requestor').value.trim();
+  const caseId = document.getElementById('f_caseId').value.trim();
+  const bpo = document.getElementById('f_bpo').value;
+  const rc3 = document.getElementById('f_rc3').value.trim();
+  const sentiment = document.getElementById('f_sentiment').value;
+
+  if (!name || !caseId || !rc3) { showToast('Please fill all required fields', 'error'); return; }
+
+  const now = new Date().toLocaleString('en-MY');
+  const timelineEntry = { action: 'Submitted', by: name, bpo: state.bpo, at: now, note: '' };
+
+  if (currentFormType === 'mcb') {
+    const contactDate = document.getElementById('f_contactDate').value;
+    const contactTime = document.getElementById('f_contactTime').value;
+    const summary = document.getElementById('f_summary').value.trim();
+    const language = document.getElementById('f_language').value;
+    const prWord = document.getElementById('f_prWord').value.trim();
+
+    if (!contactDate || !summary) { showToast('Please fill all MCB required fields', 'error'); return; }
+
+    const row = {
+      id: caseId, requestor: name, bpo, caseId, contactDate, contactTime,
+      rc3, sentiment, prWord, summary, language,
+      layer: 'L1', status: 'Pending', notes: '',
+      submittedAt: now, updatedAt: now,
+      timeline: [timelineEntry]
+    };
+    state.mcb.unshift(row);
+    postToSheet(state.mcbSheetName, 'append', {
+      row: [name, contactDate, contactTime, caseId, bpo, sentiment, prWord, rc3, summary, language, 'L1', 'Pending', '', now, now]
+    });
+  } else {
+    const prKeywords = document.getElementById('f_prKeywords').value.trim();
+    if (!prKeywords) { showToast('Please enter PR keywords', 'error'); return; }
+
+    const row = {
+      id: caseId, requestor: name, bpo, caseId, rc3, sentiment, prKeywords,
+      layer: 'L1', status: 'Pending', notes: '',
+      submittedAt: now, updatedAt: now,
+      timeline: [timelineEntry]
+    };
+    state.pr.unshift(row);
+    postToSheet(state.prSheetName, 'append', {
+      row: [name, caseId, rc3, bpo, sentiment, prKeywords, 'L1', 'Pending', '', now, now]
+    });
+  }
+
+  saveLocalData();
+  showToast('✓ Case submitted successfully', 'success');
+
+  document.getElementById('f_caseId').value = '';
+  document.getElementById('f_rc3').value = '';
+  document.getElementById('f_summary').value = '';
+  document.getElementById('f_prWord').value = '';
+  document.getElementById('f_prKeywords').value = '';
+  document.getElementById('f_contactDate').value = '';
+  document.getElementById('f_contactTime').value = '';
+
+  renderAll();
+  switchTab('mcb', document.querySelectorAll('.tab-btn')[1]);
+  if (currentFormType === 'pr') switchTab('pr', document.querySelectorAll('.tab-btn')[2]);
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+function renderAll() {
+  renderMetrics();
+  renderBPOSummary();
+  renderMCBTable();
+  renderPRTable();
+  renderRecentOverview();
+  renderMyRecent();
+  renderLayerStats('mcb');
+  renderLayerStats('pr');
+  renderBPOStats('mcb');
+  renderBPOStats('pr');
+  renderArchiveTable();
+  renderStats();
+}
+
+function statusBadge(status) {
+  const map = {
+    'Pending':          'badge-pending',
+    'L1 Review':        'badge-l1',
+    'L2 Review':        'badge-l2',
+    'STL/SV/OM Pending':'badge-l2',
+    'L3 Review':        'badge-l3',
+    'Resolved':         'badge-resolved',
+    'Rejected':         'badge-rejected'
+  };
+  return `<span class="badge ${map[status]||'badge-pending'}">${status||'Pending'}</span>`;
+}
+
+function layerBadge(layer) {
+  const map = { 'L1':'badge-l1','L2':'badge-l2','L3':'badge-l3' };
+  const label = { 'L1':'Layer 1','L2':'Layer 2','L3':'Layer 3' };
+  return `<span class="badge ${map[layer]||'badge-l1'}">${label[layer]||layer}</span>`;
+}
+
+function sentimentBadge(s) {
+  const map = { 'Calm':'badge-low', 'Frustrated':'badge-medium', 'Irate':'badge-high',
+                'Low':'badge-low', 'Medium':'badge-medium', 'High':'badge-high' };
+  return `<span class="badge ${map[s]||'badge-medium'}">${s||'—'}</span>`;
+}
+
+function renderMetrics() {
+  const bpo = state.bpo;
+  const mcb = bpo === 'ALL' ? state.mcb : state.mcb.filter(r => r.bpo === bpo);
+  const pr  = bpo === 'ALL' ? state.pr  : state.pr.filter(r => r.bpo === bpo);
+
+  const mcbPending  = mcb.filter(r => r.status==='Pending').length;
+  const prPending   = pr.filter(r => r.status==='Pending').length;
+
+  // Fix 1: AT L2 counts both MCB + PR
+  const atL2        = mcb.filter(r => r.layer==='L2').length
+                    + pr.filter(r => r.layer==='L2').length;
+
+  // Fix 3: AT L3 (Inhouse) counts both MCB + PR
+  // Transferred to L3 (Inhouse) — daily counter, resets at midnight
+  const l3Today = getDailyL3Count();
+  const atL3    = l3Today.date === todayKey() ? l3Today.count : 0;
+
+  // MCB and PR resolved today — daily localStorage counters, reset at midnight
+  const mcbResolvedData = getDailyResolvedCount('mcb');
+  const prResolvedData  = getDailyResolvedCount('pr');
+  const mcbResolved = mcbResolvedData.date === todayKey() ? mcbResolvedData.count : 0;
+  const prResolved  = prResolvedData.date  === todayKey() ? prResolvedData.count  : 0;
+
+  const scopeLabel  = bpo === 'ALL' ? 'All BPOs' : bpo;
+
+  document.getElementById('metricsRow').innerHTML = `
+    <div class="metric"><div class="metric-label">MCB Pending</div><div class="metric-val" style="color:var(--pending)">${mcbPending}</div><div class="metric-sub">${scopeLabel}</div></div>
+    <div class="metric"><div class="metric-label">PR Pending</div><div class="metric-val" style="color:var(--l3)">${prPending}</div><div class="metric-sub">${scopeLabel}</div></div>
+    <div class="metric"><div class="metric-label">At L2 (STL/SV/OM)</div><div class="metric-val" style="color:var(--l2)">${atL2}</div><div class="metric-sub">MCB + PR</div></div>
+    <div class="metric"><div class="metric-label">Transferred to L3 (Inhouse)</div><div class="metric-val" style="color:var(--l3)">${atL3}</div><div class="metric-sub">Today · MCB + PR</div></div>
+    <div class="metric"><div class="metric-label">MCB Resolved Today</div><div class="metric-val" style="color:var(--resolved)">${mcbResolved}</div><div class="metric-sub">Resets at midnight</div></div>
+    <div class="metric"><div class="metric-label">PR Resolved Today</div><div class="metric-val" style="color:var(--resolved)">${prResolved}</div><div class="metric-sub">Resets at midnight</div></div>
+  `;
+}
+
+function renderBPOSummary() {
+  const panel = document.getElementById('bpoSummaryPanel');
+  if (!panel) return;
+  if (state.bpo !== 'ALL') { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  const bpos = ['TCMY','SN','ePX','INS','IGT'];
+  const totals = { mcb:{total:0,pending:0,l1:0,l2:0,l3:0,resolved:0}, pr:{total:0,pending:0,l1:0,l2:0,l3:0,resolved:0} };
+  const rows = bpos.map(b => {
+    const m = state.mcb.filter(r => r.bpo === b);
+    const p = state.pr.filter(r => r.bpo === b);
+    const ms = { total:m.length, pending:m.filter(r=>r.status==='Pending').length, l1:m.filter(r=>r.layer==='L1'&&r.status!=='Pending'&&r.status!=='Resolved'&&r.status!=='Rejected').length, l2:m.filter(r=>r.layer==='L2').length, l3:m.filter(r=>r.layer==='L3').length, resolved:m.filter(r=>r.status==='Resolved').length };
+    const ps = { total:p.length, pending:p.filter(r=>r.status==='Pending').length, l1:p.filter(r=>r.layer==='L1'&&r.status!=='Pending'&&r.status!=='Resolved'&&r.status!=='Rejected').length, l2:p.filter(r=>r.layer==='L2').length, l3:p.filter(r=>r.layer==='L3').length, resolved:p.filter(r=>r.status==='Resolved').length };
+    ['total','pending','l1','l2','l3','resolved'].forEach(k => { totals.mcb[k]+=ms[k]; totals.pr[k]+=ps[k]; });
+    const c = (v,col) => `<td style="text-align:center;font-family:var(--mono);font-weight:600;color:${v>0&&col?col:'var(--text3)'}">${v||'—'}</td>`;
+    return `<tr>
+      <td><span class="badge badge-bpo">${b}</span></td>
+      ${c(ms.total,'var(--text)')}${c(ms.pending,'var(--pending)')}${c(ms.l1,'var(--l1)')}${c(ms.l2,'var(--l2)')}${c(ms.l3,'var(--l3)')}${c(ms.resolved,'var(--resolved)')}
+      <td style="border-left:2px solid var(--border);text-align:center;font-family:var(--mono);font-weight:600;color:${ps.total>0?'var(--text)':'var(--text3)'}">${ps.total||'—'}</td>
+      ${c(ps.pending,'var(--pending)')}${c(ps.l1,'var(--l1)')}${c(ps.l2,'var(--l2)')}${c(ps.l3,'var(--l3)')}${c(ps.resolved,'var(--resolved)')}
+    </tr>`;
+  });
+  const tc = (v,col) => `<td style="text-align:center;font-family:var(--mono);font-weight:700;color:${v>0&&col?col:'var(--text3)'}">${v||'0'}</td>`;
+  const t = totals;
+  rows.push(`<tr style="background:var(--surface2);border-top:2px solid var(--border)">
+    <td style="font-size:11px;font-weight:700;color:var(--text)">TOTAL</td>
+    ${tc(t.mcb.total,'var(--text)')}${tc(t.mcb.pending,'var(--pending)')}${tc(t.mcb.l1,'var(--l1)')}${tc(t.mcb.l2,'var(--l2)')}${tc(t.mcb.l3,'var(--l3)')}${tc(t.mcb.resolved,'var(--resolved)')}
+    <td style="border-left:2px solid var(--border);text-align:center;font-family:var(--mono);font-weight:700;color:var(--text)">${t.pr.total||'0'}</td>
+    ${tc(t.pr.pending,'var(--pending)')}${tc(t.pr.l1,'var(--l1)')}${tc(t.pr.l2,'var(--l2)')}${tc(t.pr.l3,'var(--l3)')}${tc(t.pr.resolved,'var(--resolved)')}
+  </tr>`);
+  document.getElementById('bpoSummaryBody').innerHTML = rows.join('');
+}
+
+function getFilteredMCB() {
+  const fStatus = document.getElementById('mcbFilterStatus')?.value || '';
+  const fBPO    = document.getElementById('mcbFilterBPO')?.value    || '';
+  const fSent   = document.getElementById('mcbFilterSentiment')?.value || '';
+  const fLayer  = document.getElementById('mcbFilterLayer')?.value  || '';
+  const bpoScope = fBPO || (state.bpo === 'ALL' ? '' : state.bpo);
+  return state.mcb.filter(r => {
+    // Simplified status: Pending = anything not Resolved/Rejected
+    const statusMatch = !fStatus ||
+      (fStatus === 'Pending'  && r.status !== 'Resolved' && r.status !== 'Rejected') ||
+      (fStatus === 'Resolved' && r.status === 'Resolved') ||
+      (fStatus === 'Rejected' && r.status === 'Rejected');
+    return statusMatch &&
+      (!bpoScope || r.bpo === bpoScope) &&
+      (!fSent   || r.sentiment === fSent) &&
+      (!fLayer  || r.layer === fLayer);
+  });
+}
+
+function getFilteredPR() {
+  const fStatus = document.getElementById('prFilterStatus')?.value    || '';
+  const fBPO    = document.getElementById('prFilterBPO')?.value       || '';
+  const fSent   = document.getElementById('prFilterSentiment')?.value || '';
+  const fLayer  = document.getElementById('prFilterLayer')?.value     || '';
+  const bpoScope = fBPO || (state.bpo === 'ALL' ? '' : state.bpo);
+  return state.pr.filter(r => {
+    const statusMatch = !fStatus ||
+      (fStatus === 'Pending'  && r.status !== 'Resolved' && r.status !== 'Rejected') ||
+      (fStatus === 'Resolved' && r.status === 'Resolved') ||
+      (fStatus === 'Rejected' && r.status === 'Rejected');
+    return statusMatch &&
+      (!bpoScope || r.bpo === bpoScope) &&
+      (!fSent   || r.sentiment === fSent) &&
+      (!fLayer  || r.layer === fLayer);
+  });
+}
+
+function renderMCBTable() {
+  const rows = getFilteredMCB();
+  const tbody = document.getElementById('mcbTableBody');
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="9"><div class="empty"><div class="empty-icon">📭</div><div class="empty-text">No MCB requests yet</div></div></td></tr>'; return; }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td><div class="td-id">${r.caseId||'—'}</div><div class="td-sub">${r.id}</div></td>
+      <td><div class="td-name">${r.requestor}</div><div class="td-sub">${r.submittedAt}</div></td>
+      <td><span class="badge badge-bpo">${r.bpo}</span></td>
+      <td>${r.contactDate||'—'}<br><span class="td-sub">${r.contactTime||''}</span></td>
+      <td class="td-hide">${sentimentBadge(r.sentiment)}</td>
+      <td class="td-hide" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px">${r.prWord||'—'}</td>
+      <td>${layerBadge(r.layer)}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="openDrawer('mcb','${r.id}')">View</button></td>
+    </tr>
+  `).join('');
+}
+
+function renderPRTable() {
+  const rows = getFilteredPR();
+  const tbody = document.getElementById('prTableBody');
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="9"><div class="empty"><div class="empty-icon">📭</div><div class="empty-text">No PR triggering cases yet</div></div></td></tr>'; return; }
+  tbody.innerHTML = rows.map(r => {
+    const kws = (r.prKeywords||'').split(',').map(k=>k.trim()).filter(Boolean).slice(0,2);
+    return `
+    <tr>
+      <td><div class="td-id">${r.caseId||'—'}</div><div class="td-sub">${r.id}</div></td>
+      <td><div class="td-name">${r.requestor}</div><div class="td-sub">${r.submittedAt}</div></td>
+      <td><span class="badge badge-bpo">${r.bpo}</span></td>
+      <td class="td-hide" style="font-size:11px">${r.rc3||'—'}</td>
+      <td class="td-hide">${sentimentBadge(r.sentiment)}</td>
+      <td><div class="kw-list">${kws.map(k=>`<span class="kw-tag">${k}</span>`).join('')}${(r.prKeywords||'').split(',').length > 2 ? `<span class="kw-tag">+${(r.prKeywords||'').split(',').length-2}</span>`:''}</div></td>
+      <td>${layerBadge(r.layer)}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="openDrawer('pr','${r.id}')">View</button></td>
+    </tr>
+  `}).join('');
+}
+
+function renderRecentOverview() {
+  const bpo = state.bpo;
+  const mcbSrc = bpo === 'ALL' ? state.mcb : state.mcb.filter(r => r.bpo === bpo);
+  const prSrc  = bpo === 'ALL' ? state.pr  : state.pr.filter(r => r.bpo === bpo);
+  const mcb5 = mcbSrc.slice(0,5);
+  const pr5  = prSrc.slice(0,5);
+  const rMCB = document.getElementById('recentMCB');
+  const rPR = document.getElementById('recentPR');
+  if (!mcb5.length) { rMCB.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">No MCB requests yet</div></div>'; }
+  else rMCB.innerHTML = '<table style="width:100%"><tbody>' + mcb5.map(r => `
+    <tr onclick="openDrawer('mcb','${r.id}')" style="cursor:pointer">
+      <td style="padding:8px 12px"><div class="td-id">${r.caseId}</div><div class="td-sub">${r.requestor} · ${r.bpo}</div></td>
+      <td style="padding:8px 12px">${statusBadge(r.status)}</td>
+      <td style="padding:8px 12px">${layerBadge(r.layer)}</td>
+    </tr>`).join('') + '</tbody></table>';
+  if (!pr5.length) { rPR.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">No PR cases yet</div></div>'; }
+  else rPR.innerHTML = '<table style="width:100%"><tbody>' + pr5.map(r => {
+    const kws = (r.prKeywords||'').split(',').map(k=>k.trim()).filter(Boolean);
+    return `<tr onclick="openDrawer('pr','${r.id}')" style="cursor:pointer">
+      <td style="padding:8px 12px"><div class="td-id">${r.caseId}</div><div class="td-sub">${r.requestor} · ${r.bpo}</div></td>
+      <td style="padding:8px 12px">${statusBadge(r.status)}</td>
+      <td style="padding:8px 12px">${sentimentBadge(r.sentiment)}</td>
+    </tr>`;
+  }).join('') + '</tbody></table>';
+}
+
+function renderMyRecent() {
+  const name = state.agentName;
+  const mine = [...state.mcb.filter(r=>r.requestor===name).slice(0,3).map(r=>({...r,type:'MCB'})),
+                 ...state.pr.filter(r=>r.requestor===name).slice(0,3).map(r=>({...r,type:'PR'}))];
+  const el = document.getElementById('myRecentList');
+  if (!mine.length) { el.innerHTML = '<div style="padding:1rem 1.25rem;font-size:12px;color:var(--text3)">No submissions yet</div>'; return; }
+  el.innerHTML = mine.map(r => `
+    <div onclick="openDrawer('${r.type==='MCB'?'mcb':'pr'}','${r.id}')" style="padding:8px 1.25rem;border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:center" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+      <div>
+        <div style="font-size:12px;font-weight:500">${r.caseId}</div>
+        <div style="font-size:10px;color:var(--text3)">${r.type} · ${r.submittedAt}</div>
+      </div>
+      ${statusBadge(r.status)}
+    </div>`).join('');
+}
+
+function renderLayerStats(type) {
+  const data = type === 'mcb' ? state.mcb : state.pr;
+  const layers = ['L1','L2','L3'];
+  const counts = layers.map(l => data.filter(r=>r.layer===l).length);
+  const max = Math.max(...counts, 1);
+  const colors = { L1: 'var(--l1)', L2: 'var(--l2)', L3: 'var(--l3)' };
+  const el = document.getElementById(type + 'LayerStats');
+  el.innerHTML = layers.map((l,i) => `
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
+        <span style="color:var(--text2);font-weight:500">${l === 'L1' ? 'Layer 1 (SME/TL)' : l === 'L2' ? 'Layer 2 (STL/SV/OM)' : 'Layer 3 (Inhouse)'}</span>
+        <span style="font-family:var(--mono);font-weight:600">${counts[i]}</span>
+      </div>
+      <div style="height:5px;background:var(--bg);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${counts[i]/max*100}%;background:${colors[l]};border-radius:3px;transition:width .3s"></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderBPOStats(type) {
+  const data = type === 'mcb' ? state.mcb : state.pr;
+  const bpos = ['TCMY','SN','ePX','INS','IGT'];
+  const counts = bpos.map(b => data.filter(r=>r.bpo===b).length);
+  const max = Math.max(...counts, 1);
+  const el = document.getElementById(type + 'BPOStats');
+  el.innerHTML = bpos.map((b,i) => `
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
+        <span style="color:var(--text2);font-weight:500">${b}</span>
+        <span style="font-family:var(--mono);font-weight:600">${counts[i]}</span>
+      </div>
+      <div style="height:5px;background:var(--bg);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${counts[i]/max*100}%;background:var(--shopee);border-radius:3px;opacity:${0.4 + 0.6*(counts[i]/max)};transition:width .3s"></div>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// DRAWER / DETAIL VIEW
+// ═══════════════════════════════════════════════════════
+let drawerType = '';
+let drawerId = '';
+
+function openDrawer(type, id) {
+  drawerType = type;
+  drawerId = id;
+  const row = (type === 'mcb' ? state.mcb : state.pr).find(r => r.id === id || r.caseId === id);
+  if (!row) return;
+
+  document.getElementById('drawerTitle').textContent = (type === 'mcb' ? 'MCB Tracker' : 'PR Triggering Submission') + ' — ' + row.caseId;
+  document.getElementById('drawerSub').textContent = row.id + ' · Submitted ' + row.submittedAt;
+
+  // Escalation path
+  const path = `
+    <div class="escalation-path">
+      <span class="esc-step badge-l1 ${row.layer==='L1'?'current':''}">L1 · SME/TL</span>
+      <span class="esc-arrow">→</span>
+      <span class="esc-step badge-l2 ${row.layer==='L2'?'current':''}">L2 · STL/SV/OM</span>
+      <span class="esc-arrow">→</span>
+      <span class="esc-step badge-l3 ${row.layer==='L3'?'current':''}">L3 · Inhouse</span>
+    </div>
+  `;
+
+  // Details
+  let details = `
+    <div class="drawer-section">
+      ${path}
+      <dl class="dl">
+        <dt>Status</dt><dd>${statusBadge(row.status)}</dd>
+        <dt>Current Layer</dt><dd>${layerBadge(row.layer)}</dd>
+        <dt>Requestor</dt><dd>${row.requestor}</dd>
+        <dt>BPO</dt><dd>${row.bpo}</dd>
+        <dt>Risk</dt><dd>${sentimentBadge(row.sentiment)}</dd>
+        <dt>RC3</dt><dd>${row.rc3||'—'}</dd>`;
+
+  if (type === 'mcb') {
+    details += `
+        <dt>Contact Date</dt><dd>${row.contactDate||'—'}</dd>
+        <dt>Contact Time</dt><dd>${row.contactTime||'—'}</dd>
+        <dt>PR Word</dt><dd>${row.prWord||'—'}</dd>
+        <dt>Language</dt><dd>${row.language||'—'}</dd>
+      </dl>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-title">Summary / Root Cause</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.7;padding:8px 10px;background:var(--bg);border-radius:var(--radius)">${row.summary||'—'}</div>
+    </div>`;
+  } else {
+    const kws = (row.prKeywords||'').split(',').map(k=>k.trim()).filter(Boolean);
+    details += `
+      </dl>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-title">PR Keywords / Sentences</div>
+      <div class="kw-list">${kws.map(k=>`<span class="kw-tag">${k}</span>`).join('')}</div>
+    </div>`;
+  }
+
+  if (row.notes) {
+    details += `<div class="drawer-section"><div class="drawer-section-title">Notes</div><div style="font-size:12px;color:var(--text2);font-style:italic;padding:8px 10px;background:var(--bg);border-radius:var(--radius)">${row.notes}</div></div>`;
+  }
+
+  // Timeline
+  const timeline = Array.isArray(row.timeline) ? row.timeline : [];
+  details += `<div class="drawer-section recap-timeline-section"><div class="drawer-section-title">Activity Timeline</div><div class="timeline">
+    ${timeline.map((t,i) => `
+      <div class="tl-item">
+        <div class="tl-dot ${i===timeline.length-1?'active':''}">✓</div>
+        <div class="tl-content">
+          <div class="tl-action">${t.action}</div>
+          <div class="tl-meta">${t.by} · ${t.bpo} · ${t.at}</div>
+          ${t.note ? `<div class="tl-note">"${t.note}"</div>` : ''}
+        </div>
+      </div>`).join('')}
+  </div></div>`;
+
+  document.getElementById('drawerBody').innerHTML = details;
+
+  // Actions based on role and current layer
+  renderDrawerActions(row, type);
+
+  document.getElementById('drawerOverlay').classList.add('open');
+}
+
+function renderDrawerActions(row, type) {
+  const el = document.getElementById('drawerActions');
+  const isResolved = row.status === 'Resolved' || row.status === 'Rejected';
+  if (isResolved) {
+    el.innerHTML = `<div style="font-size:12px;color:var(--text3);text-align:center;padding:4px">This case has been ${row.status.toLowerCase()}.</div>`;
+    return;
+  }
+
+  const role = state.role;
+  let html = '';
+
+  // ── SME / Team Leader acting on L1 cases ──
+  if (role === 'TL' && (row.layer === 'L1' || row.status === 'Pending')) {
+    html = `
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">SME / Team Leader Name</div>
+          <input class="drawer-note-input" id="drawerActorName" placeholder="Enter your name…" value="${state.agentName||''}">
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">MCB Summary Post MCB</div>
+          <textarea class="drawer-note-input" id="drawerSummary" placeholder="Enter MCB summary after callback…" rows="3" style="resize:vertical;min-height:60px" oninput="updateSummaryCounter(this)"></textarea>
+          <div id="summaryCounter" style="font-size:10px;color:var(--text3);text-align:right;margin-top:2px">0 / 1700 chars</div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Manageable Status <span style="color:var(--shopee)">*</span></div>
+          <select class="drawer-note-input" id="drawerManageable" style="cursor:pointer" onchange="toggleInvalidReason(this.value)">
+            <option value="">— Select outcome —</option>
+            <option value="manageable">✅ User is manageable → Resolve</option>
+            <option value="escalate_l2">⬆ 2nd Layer MCB – STL/SV/OM → Escalate</option>
+            <option value="invalid">❌ Invalid Request</option>
+          </select>
+        </div>
+        <div id="invalidReasonBlock" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:var(--radius-lg);overflow:hidden">
+          <div style="padding:8px 12px;background:#fecaca30;border-bottom:1px solid #fecaca;font-size:10px;font-weight:700;color:#b91c1c;text-transform:uppercase;letter-spacing:.6px">
+            ❌ Reason for Invalid Request
+          </div>
+          <div style="padding:10px 12px;display:flex;flex-direction:column;gap:8px">
+            <div>
+              <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Why Invalid? <span style="color:var(--shopee)">*</span></div>
+              <select class="drawer-note-input" id="invalidReason" style="cursor:pointer">
+                <option value="">— Select reason —</option>
+                <option value="Duplicate request">Duplicate request</option>
+                <option value="Wrong queue / misdirected">Wrong queue / misdirected</option>
+                <option value="User already resolved before MCB">User already resolved before MCB</option>
+                <option value="Incomplete information submitted">Incomplete information submitted</option>
+                <option value="No PR word triggered">No PR word triggered</option>
+                <option value="Case not eligible for MCB">Case not eligible for MCB</option>
+                <option value="Others">Others (specify in notes)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Additional Notes</div>
+          <input class="drawer-note-input" id="drawerNote" placeholder="Optional notes…">
+        </div>
+        <div class="drawer-action-row">
+          <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center" onclick="applyManageableStatus('${row.id}','${type}')">💾 Save Update</button>
+        </div>
+      </div>`;
+  }
+
+  // ── STL / SV / OM acting on L2 cases ──
+  else if (role === 'SV' && row.layer === 'L2') {
+    // Build this week's days for the quick-pick selector
+    const today = new Date();
+    const weekDays = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      const label = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : d.toLocaleDateString('en-MY', { weekday: 'short', day: 'numeric', month: 'short' });
+      const val   = d.toISOString().split('T')[0];
+      weekDays.push(`<option value="${val}">${label} — ${d.toLocaleDateString('en-MY', { weekday: 'long', day: 'numeric', month: 'short' })}</option>`);
+    }
+
+    html = `
+      <div style="display:flex;flex-direction:column;gap:8px">
+
+        <!-- L3 callback scheduler — shown only when escalate_l3 is selected -->
+        <div id="l3CallbackBlock" style="display:none;background:#fff8ee;border:1px solid #fed7aa;border-radius:var(--radius-lg);overflow:hidden">
+          <div style="padding:8px 12px;background:#fed7aa30;border-bottom:1px solid #fed7aa;font-size:10px;font-weight:700;color:#9a3412;text-transform:uppercase;letter-spacing:.6px">
+            📅 L3 Inhouse Callback Schedule
+          </div>
+          <div style="padding:10px 12px;display:flex;flex-direction:column;gap:8px">
+            <div>
+              <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Callback Day <span style="color:var(--shopee)">*</span></div>
+              <select class="drawer-note-input" id="l3CallbackDay" style="cursor:pointer" onchange="syncL3Date(this.value)">
+                <option value="">— Select day this week —</option>
+                ${weekDays.join('')}
+                <option value="custom">📅 Pick a specific date…</option>
+              </select>
+            </div>
+            <div id="l3CustomDateRow" style="display:none">
+              <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Specific Date</div>
+              <input class="drawer-note-input" id="l3CustomDate" type="date" min="${today.toISOString().split('T')[0]}">
+            </div>
+            <div>
+              <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Callback Time</div>
+              <select class="drawer-note-input" id="l3CallbackTime" style="cursor:pointer">
+                <option value="09:00">9:00 AM</option>
+                <option value="09:30">9:30 AM</option>
+                <option value="10:00">10:00 AM</option>
+                <option value="10:30">10:30 AM</option>
+                <option value="11:00">11:00 AM</option>
+                <option value="11:30">11:30 AM</option>
+                <option value="12:00">12:00 PM</option>
+                <option value="12:30">12:30 PM</option>
+                <option value="13:00">1:00 PM</option>
+                <option value="13:30">1:30 PM</option>
+                <option value="14:00">2:00 PM</option>
+                <option value="14:30">2:30 PM</option>
+                <option value="15:00">3:00 PM</option>
+                <option value="15:30">3:30 PM</option>
+                <option value="16:00">4:00 PM</option>
+                <option value="16:30">4:30 PM</option>
+                <option value="17:00">5:00 PM</option>
+                <option value="17:30">5:30 PM</option>
+                <option value="18:00">6:00 PM</option>
+                <option value="18:30">6:30 PM</option>
+                <option value="19:00">7:00 PM</option>
+              </select>
+            </div>
+            <div style="padding:8px 10px;background:#fff3f0;border:1px solid #fecaca;border-radius:var(--radius);font-size:11px;color:#9a3412;line-height:1.7">
+              <strong>💬 Post in SeatTalk Group after saving:</strong><br>
+              <span style="font-size:12px;font-weight:600;color:#7c2d12">Calendar Only - Level 3 Callback Request</span><br>
+              <span style="color:var(--text3);font-size:10px">Include Case ID, callback date/time, and summary when posting.</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">STL / SV / OM Name</div>
+          <input class="drawer-note-input" id="drawerActorName" placeholder="Enter your name…" value="${state.agentName||''}">
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">MCB Summary Post MCB</div>
+          <textarea class="drawer-note-input" id="drawerSummary" placeholder="Enter MCB summary after callback…" rows="3" style="resize:vertical;min-height:60px" oninput="updateSummaryCounter(this)"></textarea>
+          <div id="summaryCounter" style="font-size:10px;color:var(--text3);text-align:right;margin-top:2px">0 / 1700 chars</div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Manageable Status <span style="color:var(--shopee)">*</span></div>
+          <select class="drawer-note-input" id="drawerManageable" style="cursor:pointer">
+            <option value="">— Select outcome —</option>
+            <option value="manageable">✅ User is manageable → Resolve</option>
+            <option value="escalate_l3">⬆ 3rd Layer MCB – Inhouse → Escalate via SeatTalk</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Additional Notes</div>
+          <input class="drawer-note-input" id="drawerNote" placeholder="Optional notes…">
+        </div>
+        <div class="drawer-action-row">
+          <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center" onclick="applyManageableStatus('${row.id}','${type}')">💾 Save Update</button>
+        </div>
+      </div>`;
+  }
+
+  // ── STL / SV / OM acting on L3 (post-SeatTalk escalation) ──
+  else if (role === 'SV' && row.layer === 'L3') {
+    html = `
+      <div style="padding:10px 12px;background:#fff8ee;border:1px solid #fed7aa;border-radius:var(--radius);font-size:11px;color:#9a3412;line-height:1.7;margin-bottom:8px">
+        <strong>💬 Already escalated via SeatTalk Group:</strong><br>
+        <span style="font-size:12px;font-weight:600;color:#7c2d12">Calendar Only - Level 3 Callback Request</span><br>
+        <span style="color:var(--text3);font-size:10px">Once Inhouse team confirms resolved, mark below.</span>
+      </div>
+      <input class="drawer-note-input" id="drawerNote" placeholder="Add a note (optional)…" style="margin-bottom:8px">
+      <div class="drawer-action-row">
+        <button class="btn btn-resolve btn-sm" onclick="updateCase('${row.id}','${type}','Resolved','L3')">✓ Mark Resolved</button>
+      </div>`;
+  }
+
+  else {
+    el.innerHTML = `<div style="font-size:12px;color:var(--text3);text-align:center">No actions available for your role at this stage.</div>`;
+    return;
+  }
+
+  el.innerHTML = html;
+
+  // Show/hide L3 callback block when Manageable Status changes
+  const sel = document.getElementById('drawerManageable');
+  if (sel) {
+    sel.addEventListener('change', () => {
+      const l3Block = document.getElementById('l3CallbackBlock');
+      if (l3Block) l3Block.style.display = sel.value === 'escalate_l3' ? 'block' : 'none';
+    });
+  }
+}
+
+function syncL3Date(val) {
+  const customRow = document.getElementById('l3CustomDateRow');
+  if (customRow) customRow.style.display = val === 'custom' ? 'block' : 'none';
+}
+
+function toggleInvalidReason(val) {
+  const block = document.getElementById('invalidReasonBlock');
+  if (block) block.style.display = val === 'invalid' ? 'block' : 'none';
+}
+
+function applyManageableStatus(id, type) {
+  const arr = type === 'mcb' ? state.mcb : state.pr;
+  const row = arr.find(r => r.id === id);
+  if (!row) return;
+
+  const outcome = document.getElementById('drawerManageable')?.value;
+  if (!outcome) { showToast('Please select a Manageable Status', 'error'); return; }
+
+  const actorName = document.getElementById('drawerActorName')?.value.trim() || state.agentName || state.role;
+  const summary   = document.getElementById('drawerSummary')?.value.trim() || '';
+  const note      = document.getElementById('drawerNote')?.value.trim() || '';
+
+  // Block if summary too long
+  if (summary.length > 1700) {
+    showToast(`⚠ MCB Summary too long (${summary.length} chars). Please shorten to under 1700 chars.`, 'error');
+    return;
+  }
+  const nowISO    = new Date().toISOString();
+  const now       = new Date().toLocaleString('en-MY');
+
+  // L3 callback schedule (only relevant when escalate_l3)
+  let l3CallbackDate = '', l3CallbackTime = '';
+  if (outcome === 'escalate_l3') {
+    const daySel = document.getElementById('l3CallbackDay')?.value || '';
+    l3CallbackDate = daySel === 'custom'
+      ? (document.getElementById('l3CustomDate')?.value || '')
+      : daySel;
+    l3CallbackTime = document.getElementById('l3CallbackTime')?.value || '';
+    if (!l3CallbackDate) { showToast('Please select a callback day for L3 Inhouse', 'error'); return; }
+  }
+
+  // Invalid reason (only relevant when invalid)
+  let invalidReason = '';
+  if (outcome === 'invalid') {
+    invalidReason = document.getElementById('invalidReason')?.value || '';
+    if (!invalidReason) { showToast('Please select a reason for Invalid Request', 'error'); return; }
+  }
+
+  let newStatus, newLayer, actionLabel, outcomeLabel;
+
+  if (outcome === 'manageable') {
+    newStatus   = 'Resolved';
+    newLayer    = row.layer;
+    actionLabel = 'Resolved - User is manageable';
+    outcomeLabel= 'User is manageable';
+    incrementDailyResolved(type);
+  } else if (outcome === 'escalate_l2') {
+    newStatus   = 'L2 Review';
+    newLayer    = 'L2';
+    actionLabel = 'Escalated to STL-SV-OM (L2)';
+    outcomeLabel= '2nd Layer MCB - STL/SV/OM';
+  } else if (outcome === 'escalate_l3') {
+    newStatus   = 'L3 Review';
+    newLayer    = 'L3';
+    actionLabel = 'Escalated to Inhouse (L3) via SeatTalk';
+    outcomeLabel= '3rd Layer MCB - Inhouse';
+    incrementDailyL3();
+  } else if (outcome === 'invalid') {
+    newStatus   = 'Rejected';
+    newLayer    = row.layer;
+    actionLabel = 'Rejected - Invalid Request';
+    outcomeLabel= `Invalid Request: ${invalidReason}`;
+    incrementDailyResolved(type);
+  }
+
+  // Update row state
+  row.status    = newStatus;
+  row.layer     = newLayer;
+  row.updatedAt = nowISO;
+  if (l3CallbackDate) { row.l3CallbackDate = l3CallbackDate; row.l3CallbackTime = l3CallbackTime; }
+
+  // ── Register override so sheet refreshes don't revert this ──
+  setPendingOverride(type, row.caseId, { status: newStatus, layer: newLayer });
+  if (summary) row.summary = (row.summary ? row.summary + '\n\n[Post-MCB] ' : '[Post-MCB] ') + summary;
+  if (note)    row.notes   = note;
+
+  const tlEntry = { action: actionLabel, by: actorName, bpo: row.bpo, at: now, note: summary || note };
+  if (!Array.isArray(row.timeline)) row.timeline = [];
+  row.timeline.push(tlEntry);
+
+  // Build clean recap for Google Sheet column
+  const roleName = state.role === 'TL' ? 'SME / Team Leader' : 'STL / SV / OM';
+  const sheetName = type === 'mcb' ? 'MCB Tracker' : 'PR Triggering Submission';
+  const recapLines = [
+    `ACTIVITY UPDATE — ${sheetName}`,
+    ``,
+    `Case ID      : ${row.caseId}`,
+    `BPO          : ${row.bpo}`,
+    `Updated By   : ${actorName} (${roleName})`,
+    `Date/Time    : ${now}`,
+    `—`,
+    `Action       : ${actionLabel}`,
+    `Manageable   : ${outcomeLabel}`,
+    `New Status   : ${newStatus}`,
+    `New Layer    : ${newLayer}`,
+    l3CallbackDate ? `L3 Callback Date: ${l3CallbackDate}` : null,
+    l3CallbackDate ? `L3 Callback Time: ${l3CallbackTime}` : null,
+    invalidReason  ? `Invalid Reason   : ${invalidReason}` : null,
+    summary        ? `Post-MCB Summary: ${summary}` : null,
+    note           ? `Notes            : ${note}` : null,
+  ].filter(v => v !== null).join('\n')
+   .replace(/[^\x20-\x7E\u00A0-\u024F\n]/g, ''); // keep newlines, strip other non-printable
+
+  // Sync to Google Sheet
+  const sheetCaseId = row.caseId || row.id || '';
+  if (!sheetCaseId) {
+    showToast('⚠ Cannot update sheet — Case ID is missing', 'error');
+  } else {
+    postToSheet(type === 'mcb' ? state.mcbSheetName : state.prSheetName, 'update', {
+      caseId: sheetCaseId, status: newStatus, layer: newLayer,
+      note, actorName, updatedAt: now,
+      manageableStatus: outcomeLabel,
+      recap: recapLines,
+      role: state.role,
+      l3CallbackDate, l3CallbackTime, invalidReason
+    });
+  }
+
+  saveLocalData();
+  showToast(`✓ ${actionLabel}`, 'success');
+  renderAll();
+
+  // ── Show recap inside drawer (do NOT close) ──
+  showRecap({ row, type, actorName, summary, note, actionLabel, outcomeLabel, newStatus, newLayer, now, l3CallbackDate, l3CallbackTime, invalidReason });
+}
+
+function showRecap({ row, type, actorName, summary, note, actionLabel, outcomeLabel, newStatus, newLayer, now, l3CallbackDate, l3CallbackTime, invalidReason }) {
+  // Refresh drawer body with updated timeline
+  const timeline = Array.isArray(row.timeline) ? row.timeline : [];
+  const timelineHtml = timeline.map((t, i) => `
+    <div class="tl-item">
+      <div class="tl-dot ${i === timeline.length - 1 ? 'active' : ''}">✓</div>
+      <div class="tl-content">
+        <div class="tl-action">${t.action}</div>
+        <div class="tl-meta">${t.by} · ${t.bpo} · ${t.at}</div>
+        ${t.note ? `<div class="tl-note">"${t.note}"</div>` : ''}
+      </div>
+    </div>`).join('');
+
+  // Re-render timeline section only
+  const drawerBody = document.getElementById('drawerBody');
+  const tlSection = drawerBody.querySelector('.recap-timeline-section');
+  if (tlSection) {
+    tlSection.querySelector('.timeline').innerHTML = timelineHtml;
+  }
+
+  // Build the recap text for manual Google Sheet update
+  const sheetTab   = type === 'mcb' ? 'MCB Tracker' : 'PR Triggering Submission';
+  const roleName   = state.role === 'TL' ? 'SME / Team Leader' : 'STL / SV / OM';
+  const recapLines = [
+    `📋 ACTIVITY UPDATE — ${sheetTab}`,
+    `────────────────────────────`,
+    `Case ID        : ${row.caseId}`,
+    `BPO            : ${row.bpo}`,
+    `Updated By     : ${actorName} (${roleName})`,
+    `Date/Time      : ${now}`,
+    `─`,
+    `Action         : ${actionLabel}`,
+    `Manageable     : ${outcomeLabel}`,
+    `New Status     : ${newStatus}`,
+    `New Layer      : ${newLayer}`,
+    l3CallbackDate ? `L3 Callback Date: ${l3CallbackDate}` : null,
+    l3CallbackTime ? `L3 Callback Time: ${l3CallbackTime}` : null,
+    invalidReason  ? `Invalid Reason  : ${invalidReason}` : null,
+    summary ? `Post-MCB Summary: ${summary}` : null,
+    note    ? `Notes          : ${note}` : null,
+  ].filter(Boolean).join('\n');
+
+  // Determine card colour theme
+  const headClass = newStatus === 'Resolved' ? '' : newLayer === 'L3' ? ' l3' : ' escalated';
+  const headIcon  = newStatus === 'Resolved' ? '✅' : newLayer === 'L3' ? '⚠️' : '⬆️';
+
+  const recapHtml = `
+    <div style="display:flex;flex-direction:column;gap:12px">
+
+      <div style="font-size:11px;color:var(--text3);text-align:center;font-style:italic">
+        ✓ Saved &amp; syncing to Google Sheet automatically.
+      </div>
+
+      <div class="recap-card">
+        <div class="recap-card-head${headClass}">
+          <span style="font-size:16px">${headIcon}</span>
+          <div class="recap-card-title">${actionLabel}</div>
+          <span class="recap-card-badge ${newStatus==='Resolved'?'badge-resolved':newLayer==='L3'?'badge-l3':'badge-l2'}">${newStatus}</span>
+        </div>
+        <div class="recap-body">
+          <div class="recap-row"><span class="recap-label">Case ID</span><span class="recap-value">${row.caseId}</span></div>
+          <div class="recap-row"><span class="recap-label">BPO</span><span class="recap-value">${row.bpo}</span></div>
+          <div class="recap-row"><span class="recap-label">Updated by</span><span class="recap-value">${actorName}</span></div>
+          <div class="recap-row"><span class="recap-label">Date / Time</span><span class="recap-value">${now}</span></div>
+          <hr class="recap-divider">
+          <div class="recap-row"><span class="recap-label">Outcome</span><span class="recap-value">${outcomeLabel}</span></div>
+          <div class="recap-row"><span class="recap-label">New Status</span><span class="recap-value">${statusBadge(newStatus)}</span></div>
+          <div class="recap-row"><span class="recap-label">New Layer</span><span class="recap-value">${layerBadge(newLayer)}</span></div>
+          ${summary ? `<hr class="recap-divider"><div class="recap-row" style="grid-template-columns:120px 1fr"><span class="recap-label">Post-MCB Summary</span><span class="recap-value" style="font-style:italic">${summary}</span></div>` : ''}
+          ${note    ? `<div class="recap-row"><span class="recap-label">Notes</span><span class="recap-value" style="font-style:italic">${note}</span></div>` : ''}
+        </div>
+        <div style="padding:8px 14px 4px;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px">
+          📋 Activity Update — copied to clipboard
+        </div>
+        <pre class="recap-copy-block" id="recapCopyText">${recapLines}</pre>
+        <div class="recap-footer">
+          <button class="btn-copy" id="recapCopyBtn" onclick="copyRecap()">📋 Copy to Clipboard</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeDrawerDirect()">Close</button>
+        </div>
+      </div>
+
+    </div>`;
+
+  document.getElementById('drawerActions').innerHTML = recapHtml;
+}
+
+function copyRecap() {
+  const text = document.getElementById('recapCopyText')?.textContent || '';
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('recapCopyBtn');
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 Copy to Clipboard'; btn.classList.remove('copied'); }, 2500);
+  }).catch(() => {
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    showToast('Copied!', 'success');
+  });
+}
+
+function updateCase(id, type, newStatus, newLayer) {
+  const arr = type === 'mcb' ? state.mcb : state.pr;
+  const row = arr.find(r => r.id === id);
+  if (!row) return;
+
+  const note = document.getElementById('drawerNote')?.value.trim() || '';
+  const now = new Date().toLocaleString('en-MY');
+  const actionLabel = newStatus === 'Resolved' ? 'Resolved' :
+                      newStatus === 'Rejected' ? 'Rejected' :
+                      newStatus === 'L1 Review' ? 'Acknowledged (L1)' :
+                      `Escalated to ${newLayer}`;
+
+  row.status = newStatus;
+  row.layer = newLayer;
+  row.notes = note || row.notes;
+  row.updatedAt = now;
+  if (!Array.isArray(row.timeline)) row.timeline = [];
+  row.timeline.push({ action: actionLabel, by: state.agentName || state.role, bpo: state.bpo, at: now, note });
+
+  postToSheet(type === 'mcb' ? state.mcbSheetName : state.prSheetName, 'update', {
+    caseId: row.caseId, status: newStatus, layer: newLayer, note, updatedAt: now
+  });
+
+  saveLocalData();
+  showToast(`✓ Case ${actionLabel.toLowerCase()}`, 'success');
+  closeDrawerDirect();
+  renderAll();
+}
+
+function closeDrawer(e) { if (e.target === document.getElementById('drawerOverlay')) closeDrawerDirect(); }
+function closeDrawerDirect() { document.getElementById('drawerOverlay').classList.remove('open'); }
+
+// ═══════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════
+function exportSheet(type) {
+  const data = type === 'mcb' ? state.mcb : state.pr;
+  if (!data.length) { showToast('No data to export', 'error'); return; }
+
+  let headers, rows;
+  if (type === 'mcb') {
+    headers = ['Requestor?','Date to contact the user?','Time to contact the user?','Case ID','Which BPO?','User Sentiment/Risk?','PR Word Triggered?','Reason Code 3','Summary/Root cause for MCB','MCB Language Preferred?','Layer','Status','Notes','Submitted At','Updated At'];
+    rows = data.map(r => [r.requestor,r.contactDate,r.contactTime,r.caseId,r.bpo,r.sentiment,r.prWord,r.rc3,`"${(r.summary||'').replace(/"/g,'""')}"`,r.language,r.layer,r.status,`"${(r.notes||'').replace(/"/g,'""')}"`,r.submittedAt,r.updatedAt]);
+  } else {
+    headers = ['Requestor?','Case ID','Reason Code 3','Which BPO?','User Sentiment/Risk?','PR-related keywords or sentences?','Layer','Status','Notes','Submitted At','Updated At'];
+    rows = data.map(r => [r.requestor,r.caseId,r.rc3,r.bpo,r.sentiment,`"${(r.prKeywords||'').replace(/"/g,'""')}"`,r.layer,r.status,`"${(r.notes||'').replace(/"/g,'""')}"`,r.submittedAt,r.updatedAt]);
+  }
+
+  const csv = [headers.join(','), ...rows.map(r=>r.join(','))].join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${type}_export_${Date.now()}.csv`; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Exported!', 'success');
+}
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type||'');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════════════════════
+// ── DAILY L3 COUNTER ──────────────────────────────────
+// Tracks how many cases were escalated to L3 today.
+// Resets to 0 at midnight alongside the archive reset.
+function getDailyL3Count() {
+  const stored = localStorage.getItem('mcbpr_daily_l3');
+  if (!stored) return { date: '', count: 0 };
+  try { return JSON.parse(stored); } catch(e) { return { date: '', count: 0 }; }
+}
+function incrementDailyL3() {
+  const today = todayKey();
+  const cur = getDailyL3Count();
+  const count = (cur.date === today ? cur.count : 0) + 1;
+  localStorage.setItem('mcbpr_daily_l3', JSON.stringify({ date: today, count }));
+}
+function getDailyResolvedCount(type) {
+  const stored = localStorage.getItem('mcbpr_daily_resolved_' + type);
+  if (!stored) return { date: '', count: 0 };
+  try { return JSON.parse(stored); } catch(e) { return { date: '', count: 0 }; }
+}
+function incrementDailyResolved(type) {
+  const today = todayKey();
+  const cur = getDailyResolvedCount(type);
+  const count = (cur.date === today ? cur.count : 0) + 1;
+  localStorage.setItem('mcbpr_daily_resolved_' + type, JSON.stringify({ date: today, count }));
+}
+function resetDailyL3() {
+  const today = todayKey();
+  localStorage.setItem('mcbpr_daily_l3',            JSON.stringify({ date: today, count: 0 }));
+  localStorage.setItem('mcbpr_daily_resolved_mcb',  JSON.stringify({ date: today, count: 0 }));
+  localStorage.setItem('mcbpr_daily_resolved_pr',   JSON.stringify({ date: today, count: 0 }));
+}
+
+// ARCHIVE — daily midnight reset + archive
+// ═══════════════════════════════════════════════════════
+
+// archive structure: { "2026-04-17": [ { type, ...row }, ... ], ... }
+let archive = {};
+
+function loadArchive() {
+  const raw = localStorage.getItem('mcbpr_archive');
+  if (raw) try { archive = JSON.parse(raw); } catch(e) {}
+}
+
+function saveArchive() {
+  localStorage.setItem('mcbpr_archive', JSON.stringify(archive));
+}
+
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function checkMidnightReset() {
+  const lastReset = localStorage.getItem('mcbpr_last_reset') || '';
+  const today = todayKey();
+  if (lastReset === today) return;
+
+  // Archive resolved cases before clearing
+  buildArchiveFromState();
+
+  // Reset all daily counters
+  resetDailyL3();
+  localStorage.setItem('mcbpr_last_reset', today);
+  renderAll();
+}
+
+function buildArchiveFromState() {
+  // Build archive directly from current state — resolved/rejected cases from sheet
+  const today = todayKey();
+  archive = {};
+
+  const allResolved = [
+    ...state.mcb.filter(r => r.status === 'Resolved' || r.status === 'Rejected').map(r => ({ ...r, type: 'MCB' })),
+    ...state.pr.filter(r  => r.status === 'Resolved' || r.status === 'Rejected').map(r => ({ ...r, type: 'PR'  }))
+  ];
+
+  allResolved.forEach(r => {
+    // Use updatedAt date as archive date, fallback to submittedAt, fallback to today
+    let dateKey = today;
+    const dateRaw = r.updatedAt || r.submittedAt || r.contactDate || '';
+    if (dateRaw) {
+      const d = parseMYDate(dateRaw);
+      if (d) {
+        dateKey = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      }
+    }
+    if (!archive[dateKey]) archive[dateKey] = [];
+    archive[dateKey].push({ ...r, archivedDate: dateKey });
+  });
+
+  saveArchive();
+  populateArchiveDateFilter();
+}
+
+function populateArchiveDateFilter() {
+  const sel = document.getElementById('archiveFilterDate');
+  if (!sel) return;
+  const dates = Object.keys(archive).sort().reverse();
+  sel.innerHTML = '<option value="">All Dates</option>'
+    + dates.map(d => `<option value="${d}">${formatArchiveDate(d)}</option>`).join('');
+}
+
+function formatArchiveDate(key) {
+  // key = "2026-04-17"
+  const [y, m, d] = key.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${d} ${months[parseInt(m,10)-1]} ${y}`;
+}
+
+function renderArchiveTable() {
+  const tbody = document.getElementById('archiveTableBody');
+  if (!tbody) return;
+
+  const filterDate = document.getElementById('archiveFilterDate')?.value || '';
+  const filterType = document.getElementById('archiveFilterType')?.value || '';
+
+  // Flatten archive into rows
+  let rows = [];
+  Object.entries(archive).forEach(([date, cases]) => {
+    cases.forEach(c => rows.push({ ...c, archivedDate: date }));
+  });
+
+  // Apply filters
+  if (filterDate) rows = rows.filter(r => r.archivedDate === filterDate);
+  if (filterType) rows = rows.filter(r => r.type.toLowerCase() === filterType);
+
+  // Sort newest first
+  rows.sort((a, b) => b.archivedDate.localeCompare(a.archivedDate));
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty"><div class="empty-icon">🗂</div><div class="empty-text">No archived cases yet — resolved cases appear here after midnight reset</div></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(r => {
+    // Determine which layer resolved it from manageableStatus
+    const ms = (r.manageableStatus || '').toLowerCase();
+    let resolvedByLayer = r.layer || 'L1';
+    let resolvedByLabel = 'SME / Team Leader';
+    if (ms.includes('3rd') || ms.includes('inhouse')) {
+      resolvedByLayer = 'L3'; resolvedByLabel = '3rd Layer (Inhouse)';
+    } else if (ms.includes('2nd') || ms.includes('stl') || r.layer === 'L2') {
+      resolvedByLayer = 'L2'; resolvedByLabel = 'STL / SV / OM';
+    }
+
+    const resolvedAt = r.updatedAt
+      ? new Date(r.updatedAt).toLocaleString('en-MY', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})
+      : '—';
+
+    return `
+    <tr>
+      <td><span style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--text2)">${formatArchiveDate(r.archivedDate)}</span></td>
+      <td><span class="badge ${r.type==='MCB'?'badge-l2':'badge-l3'}">${r.type}</span></td>
+      <td><div class="td-id">${r.caseId||'—'}</div></td>
+      <td><div class="td-name" style="font-size:12px">${r.requestor||'—'}</div></td>
+      <td><span class="badge badge-bpo">${r.bpo||'—'}</span></td>
+      <td>${layerBadge(resolvedByLayer)} <span style="font-size:10px;color:var(--text3)">${resolvedByLabel}</span></td>
+      <td>${statusBadge(r.status)}</td>
+      <td style="font-size:11px;color:var(--text3);white-space:nowrap">${resolvedAt}</td>
+      <td style="font-size:11px;color:var(--text2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.manageableStatus||''}">${r.manageableStatus||'—'}</td>
+    </tr>
+  `}).join('');
+}
+
+function exportArchive() {
+  if (!Object.keys(archive).length) { showToast('No archive data to export', 'error'); return; }
+  const headers = ['Archived Date','Type','Case ID','Requestor','BPO','Resolved By Layer','Status','Resolved At','Outcome'];
+  const rows = [];
+  Object.entries(archive).forEach(([date, cases]) => {
+    cases.forEach(c => {
+      const ms = (c.manageableStatus || '').toLowerCase();
+      let layer = 'SME / Team Leader';
+      if (ms.includes('3rd') || ms.includes('inhouse')) layer = '3rd Layer (Inhouse)';
+      else if (ms.includes('2nd') || ms.includes('stl') || c.layer === 'L2') layer = 'STL / SV / OM';
+      const resolvedAt = c.updatedAt ? new Date(c.updatedAt).toLocaleString('en-MY') : '';
+      rows.push([
+        formatArchiveDate(date), c.type, c.caseId||'', c.requestor||'', c.bpo||'',
+        layer, c.status||'', resolvedAt, `"${(c.manageableStatus||'').replace(/"/g,'""')}"`
+      ]);
+    });
+  });
+  rows.sort((a,b) => b[0].localeCompare(a[0]));
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `archive_export_${Date.now()}.csv`; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Archive exported!', 'success');
+}
+
+// ═══════════════════════════════════════════════════════
+// STATISTICS
+// ═══════════════════════════════════════════════════════
+function getStatsData() {
+  const period = document.getElementById('statsPeriod')?.value || 'month';
+  const type   = document.getElementById('statsType')?.value   || 'all';
+  const selectedBPO = state.bpo || 'ALL'; // from nav bar BPO selector
+  const now    = new Date();
+  now.setHours(0,0,0,0);
+
+  function getRowDate(r) {
+    const candidates = [r.updatedAt, r.submittedAt, r.contactDate];
+    for (const c of candidates) {
+      if (!c) continue;
+      const d = parseMYDate(c);
+      if (d) return d;
+    }
+    return null;
+  }
+
+  function inPeriod(r) {
+    if (period === 'all') return true;
+    const d = getRowDate(r);
+    if (!d) return false;
+    const dc = new Date(d); dc.setHours(0,0,0,0);
+    if (period === 'day') return dc.getTime() === now.getTime();
+    if (period === 'week') { const w = new Date(now); const day = now.getDay(); w.setDate(now.getDate() - (day === 0 ? 6 : day - 1)); w.setHours(0,0,0,0); return dc >= w; }
+    if (period === 'month') return dc.getMonth() === now.getMonth() && dc.getFullYear() === now.getFullYear();
+    return true;
+  }
+
+  // BPO filter — ALL = show everything, otherwise filter by selected BPO
+  function inBPO(r) {
+    if (selectedBPO === 'ALL') return true;
+    return (r.bpo || '').toUpperCase() === selectedBPO.toUpperCase();
+  }
+
+  let mcbRows = state.mcb.filter(r => inPeriod(r) && inBPO(r)).map(r => ({...r, _type:'MCB'}));
+  let prRows  = state.pr.filter(r  => inPeriod(r) && inBPO(r)).map(r => ({...r, _type:'PR'}));
+
+  Object.values(archive).forEach(cases => {
+    cases.forEach(c => {
+      if (!inPeriod(c) || !inBPO(c)) return;
+      if (c.type === 'MCB') mcbRows.push({...c, _type:'MCB'});
+      else prRows.push({...c, _type:'PR'});
+    });
+  });
+
+  // Dedup within each type separately — MCB and PR can share the same caseId (same order).
+  // Rows with no caseId are always kept (they can't be duplicates of anything).
+  let mcbIdx = 0, prIdx = 0;
+  const seenMCB = new Set();
+  const seenPR  = new Set();
+  const dedupMCB = arr => arr.filter(r => {
+    const k = (r.caseId || r.id || '').trim();
+    const key = k ? 'MCB:' + k : 'MCB:_idx_' + (mcbIdx++); // blank caseId = always unique
+    if (seenMCB.has(key)) return false;
+    seenMCB.add(key); return true;
+  });
+  const dedupPR = arr => arr.filter(r => {
+    const k = (r.caseId || r.id || '').trim();
+    const key = k ? 'PR:' + k : 'PR:_idx_' + (prIdx++);
+    if (seenPR.has(key)) return false;
+    seenPR.add(key); return true;
+  });
+  mcbRows = dedupMCB(mcbRows);
+  prRows  = dedupPR(prRows);
+
+  const rows = type === 'mcb' ? mcbRows : type === 'pr' ? prRows : [...mcbRows, ...prRows];
+  return { rows, mcb: mcbRows, pr: prRows, getRowDate };
+}
+
+function statsBar(label, count, total, color) {
+  const pct = total > 0 ? Math.round(count / total * 100) : 0;
+  return `
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:12px;gap:8px">
+        <span style="color:var(--text);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0">${label}</span>
+        <span style="color:var(--text2);font-weight:600;white-space:nowrap">${count} <span style="color:var(--text3);font-weight:400;font-size:11px">${pct}%</span></span>
+      </div>
+      <div style="background:var(--border);border-radius:4px;height:8px;overflow:hidden">
+        <div style="background:${color};height:100%;width:${pct}%;border-radius:4px;transition:width .5s ease"></div>
+      </div>
+    </div>`;
+}
+
+function statCard(label, value, color, sub) {
+  return `
+    <div style="background:var(--bg);border-radius:var(--radius-lg);padding:14px 16px;border-left:3px solid ${color}">
+      <div style="font-size:24px;font-weight:700;color:${color};line-height:1">${value}</div>
+      <div style="font-size:11px;font-weight:600;color:var(--text);margin-top:6px;line-height:1.4">${label}</div>
+      ${sub ? `<div style="font-size:10px;color:var(--text3);margin-top:2px">${sub}</div>` : ''}
+    </div>`;
+}
+
+function normalizeKeyword(kw) {
+  return kw.toLowerCase().replace(/[^\w\s]/g, '').trim();
+}
+
+function renderStats() {
+  const { rows, mcb, pr, getRowDate } = getStatsData();
+  const total = rows.length;
+  const emptyMsg = '<div style="color:var(--text3);font-size:12px;text-align:center;padding:20px">No data for this period</div>';
+
+  // Update BPO badge
+  const badge = document.getElementById('statsBPOBadge');
+  if (badge) {
+    const bpo = state.bpo || 'ALL';
+    badge.textContent = bpo === 'ALL' ? '🌐 All BPOs' : '🏢 BPO: ' + bpo;
+    badge.style.background = bpo === 'ALL' ? '#f0fdf4' : 'var(--shopee-light)';
+    badge.style.borderColor = bpo === 'ALL' ? '#bbf7d0' : '#fcd9d0';
+    badge.style.color       = bpo === 'ALL' ? '#15803d' : 'var(--shopee)';
+  }
+
+  if (!total) {
+    ['statsBPO','statsSentiment','statsRC3','statsPRKeywords','statsManageable','statsVolume','statsSummaryCards']
+      .forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = emptyMsg; });
+    return;
+  }
+
+  const resolvedOnly = rows.filter(r => r.status === 'Resolved').length;
+  const rejectedOnly = rows.filter(r => r.status === 'Rejected').length;
+  const resolved = resolvedOnly + rejectedOnly;
+  const pending  = rows.filter(r => r.status !== 'Resolved' && r.status !== 'Rejected').length;
+  const l2count  = rows.filter(r => r.layer === 'L2').length;
+  const l3count  = rows.filter(r => r.layer === 'L3').length;
+
+  const scEl = document.getElementById('statsSummaryCards');
+  if (scEl) scEl.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:4px">
+      ${statCard('Total Cases', total, '#6b7280', 'MCB: '+mcb.length+' · PR: '+pr.length)}
+      ${statCard('Resolved', resolvedOnly, '#22c55e', (total>0?Math.round(resolvedOnly/total*100):0)+'% rate')}
+      ${statCard('Rejected (Invalid)', rejectedOnly, '#6b7280', (total>0?Math.round(rejectedOnly/total*100):0)+'% rate')}
+      ${statCard('Pending', pending, '#f5a623', 'Active cases')}
+      ${statCard('Escalated to L2', l2count, '#8b5cf6', 'STL/SV/OM')}
+      ${statCard('Escalated to L3', l3count, '#ef4444', '3rd Layer')}
+    </div>`;
+
+  const bpoCount = {};
+  rows.forEach(r => { const k = r.bpo||'Unknown'; bpoCount[k] = (bpoCount[k]||0)+1; });
+  const bpoColors = { TCMY:'#EE4D2D', SN:'#3b82f6', ePX:'#8b5cf6', INS:'#22c55e', IGT:'#f59e0b' };
+  document.getElementById('statsBPO').innerHTML =
+    Object.entries(bpoCount).sort((a,b)=>b[1]-a[1])
+      .map(([k,v]) => statsBar(k, v, total, bpoColors[k]||'#6b7280')).join('') +
+    '<div style="font-size:11px;color:var(--text3);margin-top:8px;text-align:right">Total: <strong>'+total+'</strong> cases</div>';
+
+  const sentCount = { Calm:0, Frustrated:0, Irate:0 };
+  rows.forEach(r => { if (sentCount[r.sentiment] !== undefined) sentCount[r.sentiment]++; });
+  const sentColors = { Calm:'#22c55e', Frustrated:'#f59e0b', Irate:'#ef4444' };
+  document.getElementById('statsSentiment').innerHTML =
+    Object.entries(sentCount).map(([k,v]) => statsBar(k, v, total, sentColors[k])).join('') +
+    '<div style="font-size:11px;color:var(--text3);margin-top:8px;text-align:right">Total: <strong>'+total+'</strong> cases</div>';
+
+  const rc3Count = {};
+  rows.forEach(r => { const k = (r.rc3||'Unknown').trim(); rc3Count[k] = (rc3Count[k]||0)+1; });
+  const top5RC3 = Object.entries(rc3Count).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  document.getElementById('statsRC3').innerHTML = top5RC3.map(([k,v]) => statsBar(k, v, total, '#3b82f6')).join('') || emptyMsg;
+
+  const kwMap = {};
+  rows.forEach(r => {
+    const src = [r.prKeywords, r.prWord].filter(Boolean).join(',');
+    src.split(/[,;\/|]/).map(k => k.trim()).filter(k => k.length > 1).forEach(kw => {
+      const norm = normalizeKeyword(kw);
+      if (!norm) return;
+      if (!kwMap[norm]) kwMap[norm] = { count:0, labels:new Set() };
+      kwMap[norm].count++;
+      kwMap[norm].labels.add(kw.trim());
+    });
+  });
+  const top5KW = Object.entries(kwMap).sort((a,b)=>b[1].count-a[1].count).slice(0,5);
+  document.getElementById('statsPRKeywords').innerHTML =
+    top5KW.map(([,{count,labels}]) => statsBar([...labels].slice(0,2).join(' / '), count, rows.length, '#8b5cf6')).join('') || emptyMsg;
+
+  const msGroups = {
+    'User is manageable':    { count:0, color:'#22c55e', icon:'✅' },
+    'Invalid Request':       { count:0, color:'#6b7280', icon:'❌' },
+    '2nd Layer (STL/SV/OM)':{ count:0, color:'#8b5cf6', icon:'⬆' },
+    '3rd Layer (Inhouse)':   { count:0, color:'#ef4444', icon:'🏢' },
+    'Pending':               { count:0, color:'#f5a623', icon:'⏳' },
+  };
+  rows.forEach(r => {
+    const ms1 = (r.manageableStatus  || '').toLowerCase();
+    const ms2 = (r.manageableStatus2 || '').toLowerCase();
+
+    // Rejected (Invalid Request) always goes to Invalid bucket
+    if (r.status === 'Rejected' || ms1.includes('invalid')) {
+      msGroups['Invalid Request'].count++;
+    } else if (ms2.includes('3rd') || ms2.includes('3d') || ms2.includes('inhouse') ||
+        ms1.includes('3rd') || ms1.includes('3d') || ms1.includes('inhouse')) {
+      msGroups['3rd Layer (Inhouse)'].count++;
+    } else if ((ms2 && ms2 !== '') || ms1.includes('2nd') || ms1.includes('stl') || ms1.includes('sv')) {
+      msGroups['2nd Layer (STL/SV/OM)'].count++;
+    } else if (r.status === 'Resolved' || ms1.includes('manageable')) {
+      msGroups['User is manageable'].count++;
+    } else {
+      msGroups['Pending'].count++;
+    }
+  });
+  document.getElementById('statsManageable').innerHTML =
+    Object.entries(msGroups).map(([k,{count,color,icon}]) => `
+      <div style="background:var(--bg);border-radius:var(--radius-lg);padding:14px;text-align:center;border-top:3px solid ${color}">
+        <div style="font-size:10px;margin-bottom:6px">${icon}</div>
+        <div style="font-size:26px;font-weight:700;color:${color};line-height:1">${count}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:6px;line-height:1.4">${k}</div>
+        <div style="font-size:10px;color:var(--text3)">${total>0?Math.round(count/total*100):0}%</div>
+      </div>`).join('');
+
+  const volByDate = {};
+  rows.forEach(r => {
+    const d = getRowDate(r);
+    if (!d) return; // skip rows with no valid date
+    const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if (!volByDate[key]) volByDate[key] = { mcb:0, pr:0, resolvedCount:0, rejectedCount:0, pending:0 };
+    if (r._type==='MCB'||r.type==='MCB') volByDate[key].mcb++;
+    else volByDate[key].pr++;
+    if (r.status==='Resolved') volByDate[key].resolvedCount++;
+    else if (r.status==='Rejected') volByDate[key].rejectedCount++;
+    else volByDate[key].pending++;
+  });
+
+  const sortedDates = Object.keys(volByDate).sort().reverse();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  if (!sortedDates.length) {
+    document.getElementById('statsVolume').innerHTML = emptyMsg;
+    return;
+  }
+
+  // Compute totals from volByDate (only rows with valid dates)
+  const volTotals = sortedDates.reduce((acc, d) => {
+    const v = volByDate[d];
+    acc.mcb += v.mcb; acc.pr += v.pr;
+    acc.resolvedCount += v.resolvedCount; acc.rejectedCount += v.rejectedCount; acc.pending += v.pending;
+    return acc;
+  }, { mcb:0, pr:0, resolvedCount:0, rejectedCount:0, pending:0 });
+
+  document.getElementById('statsVolume').innerHTML = `
+    <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="border-bottom:2px solid var(--border);background:var(--bg)">
+        <th style="text-align:left;padding:10px 12px;color:var(--text3);font-size:11px;text-transform:uppercase;font-weight:600">Date</th>
+        <th style="text-align:center;padding:10px 12px;color:var(--l2);font-size:11px;text-transform:uppercase;font-weight:600">MCB</th>
+        <th style="text-align:center;padding:10px 12px;color:var(--l3);font-size:11px;text-transform:uppercase;font-weight:600">PR</th>
+        <th style="text-align:center;padding:10px 12px;color:var(--text);font-size:11px;text-transform:uppercase;font-weight:600">Total</th>
+        <th style="text-align:center;padding:10px 12px;color:var(--resolved);font-size:11px;text-transform:uppercase;font-weight:600">Resolved</th>
+        <th style="text-align:center;padding:10px 12px;color:var(--rejected);font-size:11px;text-transform:uppercase;font-weight:600">Rejected</th>
+        <th style="text-align:center;padding:10px 12px;color:var(--pending);font-size:11px;text-transform:uppercase;font-weight:600">Pending</th>
+      </tr></thead>
+      <tbody>
+        ${sortedDates.map((d,i) => {
+          const v = volByDate[d];
+          const [y,m,day] = d.split('-');
+          const label = day+' '+months[parseInt(m,10)-1]+' '+y;
+          return '<tr style="border-bottom:1px solid var(--border);'+(i%2===0?'background:var(--surface)':'background:var(--surface2)')+'">'+
+            '<td style="padding:9px 12px;font-weight:500">'+label+'</td>'+
+            '<td style="padding:9px 12px;text-align:center;color:var(--l2);font-weight:600">'+v.mcb+'</td>'+
+            '<td style="padding:9px 12px;text-align:center;color:var(--l3);font-weight:600">'+v.pr+'</td>'+
+            '<td style="padding:9px 12px;text-align:center;font-weight:700">'+(v.mcb+v.pr)+'</td>'+
+            '<td style="padding:9px 12px;text-align:center"><span style="background:var(--resolved-bg);color:var(--resolved-text);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">'+v.resolvedCount+'</span></td>'+
+            '<td style="padding:9px 12px;text-align:center"><span style="background:var(--rejected-bg);color:var(--rejected-text);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">'+v.rejectedCount+'</span></td>'+
+            '<td style="padding:9px 12px;text-align:center"><span style="background:var(--pending-bg);color:var(--pending-text);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">'+v.pending+'</span></td>'+
+          '</tr>';
+        }).join('')}
+        <tr style="background:var(--shopee-light);font-weight:700;border-top:2px solid var(--border)">
+          <td style="padding:10px 12px;color:var(--shopee)">TOTAL</td>
+          <td style="padding:10px 12px;text-align:center;color:var(--l2)">${volTotals.mcb}</td>
+          <td style="padding:10px 12px;text-align:center;color:var(--l3)">${volTotals.pr}</td>
+          <td style="padding:10px 12px;text-align:center;color:var(--shopee)">${volTotals.mcb+volTotals.pr}</td>
+          <td style="padding:10px 12px;text-align:center;color:var(--resolved)">${volTotals.resolvedCount}</td>
+          <td style="padding:10px 12px;text-align:center;color:var(--rejected)">${volTotals.rejectedCount}</td>
+          <td style="padding:10px 12px;text-align:center;color:var(--pending)">${volTotals.pending}</td>
+        </tr>
+      </tbody>
+    </table></div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+loadState();
+loadPendingOverrides();
+loadArchive();
+checkMidnightReset();
+checkResetNeeded();
+buildArchiveFromState();
+populateArchiveDateFilter();
+renderAll();
+
+// Auto-refresh every 30s — paused while drawer is open
+setInterval(() => {
+  const drawerOpen = document.getElementById('drawerOverlay')?.classList.contains('open');
+  if (!drawerOpen && state.scriptUrl) loadFromSheet();
+}, 30000);
+
+// Refresh when user switches back to this tab — only if drawer is closed
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    const drawerOpen = document.getElementById('drawerOverlay')?.classList.contains('open');
+    if (!drawerOpen) loadFromSheet();
+  }
+});
+
+// Midnight reset check every minute
+setInterval(() => { checkMidnightReset(); }, 60000);
+</script>
+</div><!-- end mainDashboard -->
+</body>
+</html>
