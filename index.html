@@ -831,6 +831,7 @@ tr:hover td { background: #fdfcfa; }
           <table>
             <thead>
               <tr>
+                <th style="width:36px;text-align:center">#</th>
                 <th>Case ID</th>
                 <th>Requestor</th>
                 <th>BPO</th>
@@ -903,6 +904,7 @@ tr:hover td { background: #fdfcfa; }
           <table>
             <thead>
               <tr>
+                <th style="width:36px;text-align:center">#</th>
                 <th>Case ID</th>
                 <th>Requestor</th>
                 <th>BPO</th>
@@ -1638,11 +1640,11 @@ async function loadFromSheet() {
       document.head.appendChild(script);
     });
     if (data.mcb) {
-      const merged = mergeSheetWithLocal(data.mcb.map(normalizeRow), state.mcb);
+      const merged = mergeSheetWithLocal(data.mcb.map((r,i) => normalizeRow(r, i+2)), state.mcb);
       state.mcb = applyPendingOverrides('mcb', merged);
     }
     if (data.pr) {
-      const merged = mergeSheetWithLocal(data.pr.map(normalizeRow), state.pr);
+      const merged = mergeSheetWithLocal(data.pr.map((r,i) => normalizeRow(r, i+2)), state.pr);
       state.pr = applyPendingOverrides('pr', merged);
     }
     saveLocalData();
@@ -1654,11 +1656,11 @@ async function loadFromSheet() {
       const res = await fetch(state.scriptUrl + '?ts=' + Date.now());
       const data = await res.json();
       if (data.mcb) {
-        const merged = mergeSheetWithLocal(data.mcb.map(normalizeRow), state.mcb);
+        const merged = mergeSheetWithLocal(data.mcb.map((r,i) => normalizeRow(r, i+2)), state.mcb);
         state.mcb = applyPendingOverrides('mcb', merged);
       }
       if (data.pr) {
-        const merged = mergeSheetWithLocal(data.pr.map(normalizeRow), state.pr);
+        const merged = mergeSheetWithLocal(data.pr.map((r,i) => normalizeRow(r, i+2)), state.pr);
         state.pr = applyPendingOverrides('pr', merged);
       }
       saveLocalData();
@@ -1738,7 +1740,7 @@ function parseMYDate(str) {
   return isNaN(native) ? null : native;
 }
 
-function normalizeRow(r) {
+function normalizeRow(r, sheetRow) {
   // ── Date extraction ──────────────────────────────────
   // Instead of relying on exact column names (which vary by sheet setup),
   // scan ALL fields in the row for any parseable date value.
@@ -1826,6 +1828,7 @@ function normalizeRow(r) {
 
   return {
     id: uniqueId,
+    sheetRow: sheetRow || null,
     requestor: r['Requestor?'] || '',
     bpo: r['Which BPO?'] || '',
     caseId: caseId,
@@ -2344,6 +2347,7 @@ function renderMCBTable() {
   if (!rows.length) { tbody.innerHTML = '<tr><td colspan="9"><div class="empty"><div class="empty-icon">📭</div><div class="empty-text">No MCB requests yet</div></div></td></tr>'; return; }
   tbody.innerHTML = rows.map(r => `
     <tr>
+      <td style="text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3);font-weight:600">${r.sheetRow || '—'}</td>
       <td><div class="td-id">${r.caseId||'—'}</div><div class="td-sub">${r.id}</div></td>
       <td><div class="td-name">${r.requestor}</div><div class="td-sub">${r.submittedAt}</div></td>
       <td><span class="badge badge-bpo">${r.bpo}</span></td>
@@ -2365,6 +2369,7 @@ function renderPRTable() {
     const kws = (r.prKeywords||'').split(',').map(k=>k.trim()).filter(Boolean).slice(0,2);
     return `
     <tr>
+      <td style="text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3);font-weight:600">${r.sheetRow || '—'}</td>
       <td><div class="td-id">${r.caseId||'—'}</div><div class="td-sub">${r.id}</div></td>
       <td><div class="td-name">${r.requestor}</div><div class="td-sub">${r.submittedAt}</div></td>
       <td><span class="badge badge-bpo">${r.bpo}</span></td>
@@ -2470,7 +2475,7 @@ function openDrawer(type, id) {
   if (!row) return;
 
   document.getElementById('drawerTitle').textContent = (type === 'mcb' ? 'MCB Tracker' : 'PR Triggering Submission') + ' — ' + row.caseId;
-  document.getElementById('drawerSub').textContent = row.id + ' · Submitted ' + row.submittedAt;
+  document.getElementById('drawerSub').textContent = (row.sheetRow ? 'Row ' + row.sheetRow + ' · ' : '') + row.id + ' · Submitted ' + row.submittedAt;
 
   // Escalation path
   const path = `
